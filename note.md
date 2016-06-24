@@ -23,7 +23,7 @@ Maven 依赖管理 自动下载所需依赖到本地库；
 
 2.mvn install. 会将包安装到本地库:~/.m2/repository
 # IDE
-(IntelliJ IDEA)[https://www.jetbrains.com/idea/download/#section=windows] community版，总体上比eclipse好用。
+[IntelliJ IDEA](https://www.jetbrains.com/idea/download/#section=windows) community版，总体上比eclipse好用。
 
 
 # BOOKS
