@@ -22,6 +22,9 @@ POM 中，groupId, artifactId, packaging, version 叫作 maven 坐标，它能�
 Maven 依赖管理 自动下载所需依赖到本地库；
 
 2.mvn install. 会将包安装到本地库:~/.m2/repository
+# IDE
+(IntelliJ IDEA)[https://www.jetbrains.com/idea/download/#section=windows] community版，总体上比eclipse好用。
+
 
 # BOOKS
 
@@ -84,9 +87,7 @@ class Example{
     }
 }
 ```
-
 2. 如果一个字段即是静态的又是最终的，并且使用一个编译时常量表达式初始化。
-
 ### 对象的生命周期
 
 1. 类实例化
@@ -98,18 +99,14 @@ class Example{
 		3. 其他调用类的实例初始化方法。java编译器会为每一个类的构造方法产生一个init方法。
 
 	3. 垃圾收集&卸载
-
 		1. 终结方法：名为finalize 返回void，垃圾收集器会在释放这个实例所占据的内存之前执行这个方法一次。
 		2. 从类型数据，java虚拟机必须能够确定对象的类，它的所有超类以及所有超接口的class实例。
-
-
 
 连接模型
 
 1. 动态连接和解析
 	1. 常量池：每个class文件都把它所引用符号保存在这里。常量池解析：把符号引用变成直接引用。
 	2. 早解析和迟解析：虚拟机选择解析的时机，最开始全部解析还是直到引用时才去解析class文件。
-
 
 ## java编程思想
 ### 第五章 初始化与清理
