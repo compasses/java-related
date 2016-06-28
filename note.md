@@ -177,3 +177,34 @@ protected：任何继承于此类的导出类或者其他任何位于同一个�
 5. Java泛型是通过擦除来实现的。类型参数将擦除到它的第一个边界。类型变量在没有指定边界的情况下被擦除为Object。
 
 ### 第十九章 枚举类型
+1. switch中可以直接使用enum。
+2. 命令模式：需要有一个只有单一方法的接口，然后从该接口实现具有各种不同行为的多个子类。
+
+```
+interface Command {void action();}
+
+EnumMap<enumType, Command> em = new EnumMap<enumType, Command>(enumType.class);
+em.put(ACTION_ONE, new Command() {
+  public void action() {print("ACTION_ONE fired!");}
+  })
+```
+3. enum 实例可以编写方法，从而为每个enum实例赋予不同的行为。
+4. 职责链模式：程序员以多种不同的方式来解决一个问题然后将它们链接在一起。当一个请求到来时，它遍历整个链，直到链中的某个解决方案能够处理该请求。
+5. enum类型非常适合创建状态机。
+6. 多路分发，java只支持单路分发。例如a.plus(b)，不知道a，b的类型时，必须自己来判定其他的类型，从而实现自己的动态绑定行为。
+  1. 使用接口超类，每个类型实现接口。
+  2. 使用enum分发。
+
+
+
+### 第二十一章并发
+
+1. Java的线程机制来自C的低级pthread线程。
+2. synchronized，同步方法，不属于方法特征签名，覆盖方法上使用。volatile解决可视性问题。``` javap -c classname ``` 看class字节码。
+3. 临界区也叫同步控制块，一个代码段，多个线程同时访问。同一个互斥锁可以被同一个线程多次获得。
+
+
+
+# 框架
+## Spring
+1. org.springframework.beans 和 org.springframework.context 是Spring IoC的基础。BeanFactory提供了配置框架的基础功能。ApplicationContext是更加面向企业级的功能，是BeanFactory 的超集。
