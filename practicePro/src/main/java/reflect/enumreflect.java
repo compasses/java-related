@@ -13,6 +13,9 @@ import util.*;
 enum Explore { HERE, THERE }
 
 public class enumreflect {
+    protected void finalize() {
+        util.print("gc happeen");
+    }
     public static Set<String> analyze(Class<?> enumClass) {
         util.print("----- Analyzing " + enumClass + " -----");
         util.print("Interfaces:");
@@ -35,6 +38,8 @@ public class enumreflect {
         exploreMethods.removeAll(enumMethods);
         util.print(exploreMethods);
         // Decompile the code for the enum:
-        OSExecute.command("javap Explore");
+        //OSExecute.command("javap Explore");
+        new enumreflect();
+        System.gc();
     }
 }
