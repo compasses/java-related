@@ -12,7 +12,9 @@ import util.*;
  */
 enum Explore { HERE, THERE }
 
+
 public class enumreflect {
+
     protected void finalize() {
         util.print("gc happeen");
     }

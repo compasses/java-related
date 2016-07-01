@@ -4,7 +4,15 @@
 package util;
 import java.io.*;
 
+/**
+ *
+ */
 public class OSExecute {
+  /**
+   *
+   * @param command
+     */
+
   public static void command(String command) {
     boolean err = false;
     try {
