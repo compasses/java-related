@@ -2,5 +2,6 @@
 *.iml
 */**.iml
 /target/
+/**/target/*
 /spring-mvc-showcase/
 

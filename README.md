@@ -236,9 +236,9 @@ public class Parcel3 {
 }
 ```
 
-3. 局部内部类：在方法的作用域内创建一个完整的内部类；匿名内部类，工厂方法可以使用匿名内部类实现。
+3. 局部内部类：在方法的作用域内创建一个完整的内部类；匿名内部类，工厂方法可以使用匿名内部类实现。Java内部类主要分为成员内部类，局部内部类，匿名内部类，静态内部类。
 4. 嵌套类：将内部类声明为static。创建嵌套类对象，不需要其外围类的对象；不能从嵌套类的对象中访问非静态的外围类对象。普通的内部类不能有static数据和字段，也不能包含嵌套类。嵌套类可以包含。
-5. 为啥需要内部类：每个内部类都能独立继承自一个接口的实现，所以无论外围类是否已经继承了某个实现，对于内部类没有影响。它使得多重继承的解决方案变得完整，内部类允许继承多个非接口类型。
+5. 为啥需要内部类：每个内部类都能独立继承自一个接口的实现，所以无论外围类是否已经继承了某个实现，对于内部类没有影响。它使得多重继承的解决方案变得完整，内部类允许继承多个非接口类型。内部类提供了更好的封装，除了外围类，其他类都不能访问。
 6. 闭包：是一个可调用的对象，它记录了一些信息。内部类是面向对象的闭包，通过内部类实现闭包，即可实现回调。
 
 ### 第十一章 持有对象
@@ -256,16 +256,162 @@ public class Parcel3 {
 1. Class对象就是用来创建类所有的常规对象的。使用Class的newInstance 创建的类必须有默认的构造函数。
 2. RTTI：运行时，识别一个对象的类型；java使用Class对象执行RTTI。RTTI必须在编译时已知的对象。instanceof保持了类型的概念，class比较没有考虑继承，只看是否为这个确切的类型。
 3. 类字面常量，xxx.class，使用其创建对象时，并不会自动初始化该Class对象。初始化延迟到对静态方法或者非常数静态域即非编译期常量进行首次引用时。如果一个static域不是final的，那么在访问时总是要进行连接和初始化。
+4. 向Class引用提供泛型语法的原因是为了提供编译器类型检查。
+5. 工厂方法设计模式；将对象的创建工作交给类自己去完成:
+```
+//interface
+public interface Factory<T> { T create(); } ///:~
+
+class Part {
+  public String toString() {
+    return getClass().getSimpleName();
+  }
+  static List<Factory<? extends Part>> partFactories =
+    new ArrayList<Factory<? extends Part>>();
+  static {
+    // Collections.addAll() gives an "unchecked generic
+    // array creation ... for varargs parameter" warning.
+    partFactories.add(new FuelFilter.Factory());
+    partFactories.add(new AirFilter.Factory());
+    partFactories.add(new CabinAirFilter.Factory());
+    partFactories.add(new OilFilter.Factory());
+    partFactories.add(new FanBelt.Factory());
+    partFactories.add(new PowerSteeringBelt.Factory());
+    partFactories.add(new GeneratorBelt.Factory());
+  }
+  private static Random rand = new Random(47);
+  public static Part createRandom() {
+    int n = rand.nextInt(partFactories.size());
+    return partFactories.get(n).create();
+  }
+}
+
+class Filter extends Part {}
+
+class FuelFilter extends Filter {
+  // Create a Class Factory for each specific type:
+  public static class Factory
+  implements typeinfo.factory.Factory<FuelFilter> {
+    public FuelFilter create() { return new FuelFilter(); }
+  }
+}
+
+class AirFilter extends Filter {
+  public static class Factory
+  implements typeinfo.factory.Factory<AirFilter> {
+    public AirFilter create() { return new AirFilter(); }
+  }
+}
+
+class CabinAirFilter extends Filter {
+  public static class Factory
+  implements typeinfo.factory.Factory<CabinAirFilter> {
+    public CabinAirFilter create() {
+      return new CabinAirFilter();
+    }
+  }
+}
+
+class OilFilter extends Filter {
+  public static class Factory
+  implements typeinfo.factory.Factory<OilFilter> {
+    public OilFilter create() { return new OilFilter(); }
+  }
+}
+
+class Belt extends Part {}
+
+class FanBelt extends Belt {
+  public static class Factory
+  implements typeinfo.factory.Factory<FanBelt> {
+    public FanBelt create() { return new FanBelt(); }
+  }
+}
+
+class GeneratorBelt extends Belt {
+  public static class Factory
+  implements typeinfo.factory.Factory<GeneratorBelt> {
+    public GeneratorBelt create() {
+      return new GeneratorBelt();
+    }
+  }
+}
+
+class PowerSteeringBelt extends Belt {
+  public static class Factory
+  implements typeinfo.factory.Factory<PowerSteeringBelt> {
+    public PowerSteeringBelt create() {
+      return new PowerSteeringBelt();
+    }
+  }
+}
+
+public class RegisteredFactories {
+  public static void main(String[] args) {
+    for(int i = 0; i < 10; i++)
+      System.out.println(Part.createRandom());
+  }
+}
+
+```
+6. 动态代理：代理模式是为了提供额外的或不同的操作，而插入的用来代替实际对象的对象。任何时刻只要你想要从额外的操作从实际的对象分离出来，这就是代理模式要达到的目的，封装修改。
 2. 反射：反射机制，.class文件在编译时是不可获取的，在运行时打开和检查class文件。
 3. 类三个步骤：加载、链接、初始化。instanceof 保持了类型的概念。
 
 
 ### 第十五章 泛型
 1. 主要目的之一：用来指定容器要持有什么类型的对象，而且编译器来保证类型的正确性。
-2. 泛型方法，泛型方法不必指明参数类型，，编译器会为我们找出具体的类型，这称为类型参数推断。
-3. 在泛型代码内部，无法获得任何有关泛型参数类型的信息。
-4. 装饰器模式使用分层对象来动态的透明地向单个对象添加责任。
-5. Java泛型是通过擦除来实现的。类型参数将擦除到它的第一个边界。类型变量在没有指定边界的情况下被擦除为Object。
+2. 泛型方法，泛型方法不必指明参数类型，需要将泛型参数列表置于返回值前。编译器会为我们找出具体的类型，这称为类型参数推断。
+```
+public class GenericMethods {
+  public <T> void f(T x) {
+    System.out.println(x.getClass().getName());
+  }
+  public static void main(String[] args) {
+    GenericMethods gm = new GenericMethods();
+    gm.f("");
+    gm.f(1);
+    gm.f(1.0);
+    gm.f(1.0F);
+    gm.f('c');
+    gm.f(gm);
+  }
+}
+```
+
+3. 在泛型代码内部，无法获得任何有关泛型参数类型的信息。数组可以向上转型，仅在编译时期：
+```
+class Fruit {}
+class Apple extends Fruit {}
+class Jonathan extends Apple {}
+class Orange extends Fruit {}
+
+public class CovariantArrays {
+  public static void main(String[] args) {
+    Fruit[] fruit = new Apple[10];
+    fruit[0] = new Apple(); // OK
+    fruit[1] = new Jonathan(); // OK
+    // Runtime type is Apple[], not Fruit[] or Orange[]:
+    try {
+      // Compiler allows you to add Fruit:
+      fruit[0] = new Fruit(); // ArrayStoreException
+    } catch(Exception e) { System.out.println(e); }
+    try {
+      // Compiler allows you to add Oranges:
+      fruit[0] = new Orange(); // ArrayStoreException
+    } catch(Exception e) { System.out.println(e); }
+  }
+}
+```
+4. 通配符：List<? extends MyClass>， 读作 "具有任何从MyClass继承的类型的列表"，通配符引用的是明确的类型。超类型通配符：<? super MyClass>，可以接受MyClass类型或者从MyClass类型导出的类型。无界通配符<?>
+5. 任何基本类型不能作为类型参数。autoboxing 提供了一种可行方案。
+5. 装饰器模式使用分层对象来动态的透明地向单个对象添加责任。
+6. Java泛型是通过擦除来实现的。类型参数将擦除到它的第一个边界。类型变量在没有指定边界的情况下被擦除为Object。
+
+### 第十七章 容器深入研究
+
+### 第十八章 Java I/O 系统
+1. 需要理解Java I/O 系统的演化过程，如果缺乏历史的眼光，很快我们就会对什么时候该使用哪些类，以及什么时候不该使用他们而感到迷惑。
 
 ### 第十九章 枚举类型
 1. switch中可以直接使用enum。
@@ -295,6 +441,96 @@ em.put(ACTION_ONE, new Command() {
 3. 临界区也叫同步控制块，一个代码段，多个线程同时访问。同一个互斥锁可以被同一个线程多次获得。
 
 
+#Java 8
+## interface
+1. default methods 支持。
+2. static methods 支持。
+## New Date and Time API
+Domain-driven design and Immutability-for thread safe
+
+## CompletableFuture
+可以声明式的处理和合并多个异步任务。
+```
+findBestPrice("iPhone6")
+        .thenCombine(lookupExchangeRate(Currency.GBP),
+this::exchange)
+.thenAccept(localAmount -> System.out.printf("It will cost
+    you %f GBP\n", localAmount));
+
+private CompletableFuture<Price> findBestPrice(String product Name) {
+return CompletableFuture.supplyAsync(() -> priceFinder.find BestPrice(productName));
+}
+
+private CompletableFuture<Double> lookupExchangeRate(Currency localCurrency) {
+return CompletableFuture.supplyAsync(() -> exchangeService.lookupExchangeRate(Currency.USD, localCur
+rency)); }
+```
+## Optional
+```
+public String getCityForEvent(int id) {
+  Optional.ofNullable(getEventWithId(id)).flatMap(this::getLocation) .map(this::getCity) .orElse("TBC");
+}
+```
+At any point, if a method returns an empty Optional, you get the default value "TBC".
+
+## Method Reference Lambda Expressions
+### Lambda Expression
+1. why lambda expression: behavior parameterization
+2. what：anonymous function can be  passed around
+3. how: (parameters) -> expression ; (parameters) -> { statements；}
+4. where to use：@FunctionalInterface：A functional interface is an interface that declares a single abstract method.
+### Method Reference
+1. A method reference to a static method:
+  ```
+  Function<String, Integer> converter = Integer::parseInt;
+  Integer number = converter.apply("10");
+  ```
+2. A method reference to an instance method. Specifically, you’re referring to a method of an object that will be supplied as the first parameter of the lambda:
+ ```
+ Function<Invoice, Integer> invoiceToId = Invoice::getId;
+ ```
+3. A method reference to an instance method of an existing object:
+```
+Consumer<Object> print = System.out::println;
+```
+Specifically, this kind of method reference is very useful when you want to refer to a private helper method and inject it into another method:
+```
+File[] hidden = mainDirectory.listFiles(this::isXML);
+private boolean isXML(File f) { return f.getName.endsWith(".xml");
+}
+```
+4. A constructor reference:
+```
+Supplier<List<String>> listOfString = List::new;
+```
+
+## Stream
+1. what：a sequence of elements from a source that supports aggregate operations.
+  1. Sequence of elements
+  2. Source, consume
+  3. aggregate operations , filter, map, reduce, findFirst, allMatch, sorted.
+  4. Pipelining
+  5. Internal Iteration
+2. Filtering
+  1. filter, distinct, limit, skip
+3. Matching
+  1. anyMatch, allMatch, noneMatch
+4. Finding
+  1. findFirst, findAny, all return Optional  Object
+5. Mapping
+  1. map, function argument to map new elements
+6. Reducing
+  1. two arguments：An initial value， A BinaryOperator<T>.
+  ```
+    int product = numbers.stream().reduce(1, (a, b) -> a * b); int max = numbers.stream().reduce(Integer.MIN_VALUE,
+    Integer::max);
+  ```
+## Collectors
+```
+Map<Customer, List<Invoice>> customerToInvoices
+= invoices.stream().collect(Collectors.group
+ingBy(Invoice::getCustomer));
+```
 
 # 框架
 ## Spring
