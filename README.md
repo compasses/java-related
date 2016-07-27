@@ -29,6 +29,12 @@ Maven 依赖管理 自动下载所需依赖到本地库；
 
 
 # BOOKS
+### [Thinking in Java](http://compasses.github.io/2016/07/26/book-review-thinking-in-java/)
+
+##
+
+## Java 并发编程系列
+
 
 ## 深入java虚拟机
 
