@@ -1,12 +1,18 @@
 package valuesmap.streamTest;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Created by i311352 on 7/9/16.
@@ -14,9 +20,36 @@ import java.util.function.Supplier;
 public class java8 {
 
     public static void main(String[] args) {
+
+        Stream<String> words = Stream.of("Java", "Magazine", "is",
+                "the", "best");
+
+//        Map<String, Long> letterToCount =
+//                words.map(w -> w.split(""))
+//                        .flatMap(Arrays::stream)
+//                        .collect(Collectors.toMap());
+        List<String> lines = null;
+        try {
+            lines = Files.readAllLines(Paths.get("../jsonx","jsonx.iml"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            Files.lines(Paths.get("../jsonx", "jsonx.iml"))
+                    .map(line -> line.split("\\s+")) // Stream<String[]>
+                    .flatMap(Arrays::stream) // Stream<String>
+                    .distinct() // Stream<String[]>
+                    .forEach(System.out::println);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
         new Thread(()->System.out.println("hi")).start();
 
         List<String> strs = Arrays.asList("de","C", "a", "B", "d");
+        //strs.stream().flatMap(s -> s.toUpperCase());
         Collections.sort(strs, String::compareToIgnoreCase);
         System.out.print(strs);
 
