@@ -51,7 +51,12 @@ Maven 依赖管理 自动下载所需依赖到本地库；
   ```
   可以保证你退出循环之前，条件将得到满足。
 
-
+### 并发编程实践
+1. 加锁机制既可以确保可见性又可以确保原子性，而volatile变量只能确保可见性。
+2. 避免不成熟的优化。首先使程序运行正确，然后提高运行速度--如果他运行得还不够快。
+3. ReentrantLock与synchronized有相同的互斥性和内存可见性。但其更加灵活能提供更好的活跃性或性能。finally里面释放锁。
+4. ReentrantLock可以作为一种高级工具。当需要一些高级功能时才应该使用ReentrantLock。功能包括：可定时的、可轮询的与可中断的锁获取操作，公平队列，以及非块结构的锁。否则，还是应该悠闲使用synchronized。
+5. 读写锁允许多个线程并发地访问被保护的对象。当访问以读取操作为主的数据结构时，它能提供程序的可伸缩性。
 
 ## 深入java虚拟机
 
@@ -228,3 +233,137 @@ ingBy(Invoice::getCustomer));
 # 框架
 ## Spring
 1. org.springframework.beans 和 org.springframework.context 是Spring IoC的基础。BeanFactory提供了配置框架的基础功能。ApplicationContext是更加面向企业级的功能，是BeanFactory 的超集。
+
+# 设计模式
+1. 适配器模式：
+
+
+
+
+# innodb 参数参考
+show engine innodb status;
+
+```
+=====================================
+2016-08-05 14:41:24 7feaa55b7700 INNODB MONITOR OUTPUT
+=====================================
+Per second averages calculated from the last 34 seconds
+-----------------
+BACKGROUND THREAD
+-----------------
+srv_master_thread loops: 26 srv_active, 0 srv_shutdown, 81549 srv_idle
+srv_master_thread log flush and writes: 81566
+----------
+** SEMAPHORES **
+----------
+OS WAIT ARRAY INFO: reservation count 97
+OS WAIT ARRAY INFO: signal count 97
+Mutex spin waits 462, rounds 5220, OS waits 67
+RW-shared spins 25, rounds 750, OS waits 25
+RW-excl spins 0, rounds 0, OS waits 0
+Spin rounds per wait: 11.30 mutex, 30.00 RW-shared, 0.00 RW-excl
+------------
+TRANSACTIONS
+------------
+Trx id counter 11903382
+Purge done for trx's n:o < 11903364 undo n:o < 0 state: running but idle
+History list length 846
+LIST OF TRANSACTIONS FOR EACH SESSION:
+---TRANSACTION 0, not started
+MySQL thread id 267, OS thread handle 0x7feaa55b7700, query id 6543 NKGM50934300A.dhcp.pvgl.sap.corp 10.59.161.81 root init
+show engine innodb status
+---TRANSACTION 0, not started
+MySQL thread id 266, OS thread handle 0x7feaa556e700, query id 6526 NKGM50934300A.dhcp.pvgl.sap.corp 10.59.161.81 root cleaning up
+--------
+FILE I/O
+--------
+I/O thread 0 state: waiting for completed aio requests (insert buffer thread)
+I/O thread 1 state: waiting for completed aio requests (log thread)
+I/O thread 2 state: waiting for completed aio requests (read thread)
+I/O thread 3 state: waiting for completed aio requests (read thread)
+I/O thread 4 state: waiting for completed aio requests (read thread)
+I/O thread 5 state: waiting for completed aio requests (read thread)
+I/O thread 6 state: waiting for completed aio requests (write thread)
+I/O thread 7 state: waiting for completed aio requests (write thread)
+I/O thread 8 state: waiting for completed aio requests (write thread)
+I/O thread 9 state: waiting for completed aio requests (write thread)
+Pending normal aio reads: 0 [0, 0, 0, 0] , aio writes: 0 [0, 0, 0, 0] ,
+ ibuf aio reads: 0, log i/o's: 0, sync i/o's: 0
+Pending flushes (fsync) log: 0; buffer pool: 0
+996 OS file reads, 235 OS file writes, 146 OS fsyncs
+0.00 reads/s, 0 avg bytes/read, 0.00 writes/s, 0.00 fsyncs/s
+-------------------------------------
+INSERT BUFFER AND ADAPTIVE HASH INDEX
+-------------------------------------
+Ibuf: size 1, free list len 6152, seg size 6154, 0 merges
+merged operations:
+ insert 0, delete mark 0, delete 0
+discarded operations:
+ insert 0, delete mark 0, delete 0
+0.00 hash searches/s, 0.00 non-hash searches/s
+---
+LOG
+---
+Log sequence number 42117153865
+Log flushed up to   42117153865
+Pages flushed up to 42117153865
+Last checkpoint at  42117153865
+Max checkpoint age    80826164
+Checkpoint age target 78300347
+Modified age          0
+Checkpoint age        0
+0 pending log writes, 0 pending chkp writes
+75 log i/o's done, 0.00 log i/o's/second
+----------------------
+BUFFER POOL AND MEMORY
+----------------------
+Total memory allocated 558891008; in additional pool allocated 0
+Total memory allocated by read views 96
+Internal hash tables (constant factor + variable factor)
+    Adaptive hash index 8937168 	(8851048 + 86120)
+    Page hash           553976 (buffer pool 0 only)
+    Dictionary cache    3947045 	(2214224 + 1732821)
+    File system         964312 	(812272 + 152040)
+    Lock system         1329896 	(1329176 + 720)
+    Recovery system     0 	(0 + 0)
+Dictionary memory allocated 1732821
+Buffer pool size        32767
+Buffer pool size, bytes 536854528
+Free buffers            31926
+Database pages          836
+Old database pages      328
+Modified db pages       0
+Percent of dirty pages(LRU & free pages): 0.000
+Max dirty pages percent: 75.000
+Pending reads 0
+Pending writes: LRU 0, flush list 0, single page 0
+Pages made young 0, not young 0
+0.00 youngs/s, 0.00 non-youngs/s
+Pages read 835, created 1, written 141
+0.00 reads/s, 0.00 creates/s, 0.00 writes/s
+No buffer pool page gets since the last printout
+Pages read ahead 0.00/s, evicted without access 0.00/s, Random read ahead 0.00/s
+LRU len: 836, unzip_LRU len: 0
+I/O sum[0]:cur[0], unzip sum[0]:cur[0]
+--------------
+ROW OPERATIONS
+--------------
+0 queries inside InnoDB, 0 queries in queue
+0 read views open inside InnoDB
+0 RW transactions active inside InnoDB
+0 RO transactions active inside InnoDB
+0 out of 1000 descriptors used
+Main thread process no. 1082, id 140644597085952, state: sleeping
+Number of rows inserted 0, updated 46, deleted 0, read 2097
+0.00 inserts/s, 0.00 updates/s, 0.00 deletes/s, 0.00 reads/s
+Number of system rows inserted 0, updated 0, deleted 0, read 0
+0.00 inserts/s, 0.00 updates/s, 0.00 deletes/s, ** 0.00 reads/s **
+----------------------------
+END OF INNODB MONITOR OUTPUT
+============================
+```
+
+
+ICP
+
+MRR
