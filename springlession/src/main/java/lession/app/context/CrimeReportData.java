@@ -1,6 +1,7 @@
 package lession.app.context;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
@@ -25,6 +26,10 @@ public class CrimeReportData {
 //    @Autowired
 //    private Environment environment;
 
+    @Autowired
+    @Qualifier("crimeReportDataResultDsc")
+    private CrimeReportDataResult crimeReportDataResult;
+
     @Override
     public String toString() {
         return "CrimeReportData{" +
@@ -41,6 +46,7 @@ public class CrimeReportData {
     public void load() {
         //String fileName = environment.getProperty("report.fileName");
         System.out.println("going to process filename " + fileName);
+        System.out.println("Data result " + crimeReportDataResult.getSorting());
         fileProcessorService.processFile(fileName);
     }
 

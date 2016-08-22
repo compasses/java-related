@@ -1,5 +1,10 @@
 package concurrency;
 
+import java.util.Random;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.stream.IntStream;
+
 /**
  * Created by i311352 on 8/19/16.
  */
@@ -50,6 +55,42 @@ public class BoundedBuffer <V> extends BaseBoundedBuffer<V> {
         doPut(v);
         if (wasEmpty)
             notifyAll();
+    }
+    public static  void main(String args[]) {
+        ExecutorService exec = Executors.newCachedThreadPool();
+        BoundedBuffer<Long> boundedBuffer = new BoundedBuffer<>();
+
+        Random random = new Random();
+        IntStream.range(0, 80).forEach(
+                idx -> {
+                    exec.execute(
+                            ()->
+                            {
+                                try {
+                                    while (!Thread.interrupted())
+                                        boundedBuffer.put(random.nextLong());
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
+                                }
+
+                            });
+                }
+        );
+
+        IntStream.range(0, 8).forEach(
+                idx -> {
+                    exec.execute(
+                            ()->
+                            {
+                                try {
+                                    while (!Thread.interrupted())
+                                        boundedBuffer.take();
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
+                                }
+                            });
+                }
+        );
     }
 }
 

@@ -18,6 +18,7 @@ public abstract class BaseBoundedBuffer <V> {
         if (++tail == buf.length)
             tail = 0;
         ++count;
+        System.out.println("Put " + v);
     }
 
     protected synchronized final V doTake() {
@@ -26,6 +27,8 @@ public abstract class BaseBoundedBuffer <V> {
         if (++head == buf.length)
             head = 0;
         --count;
+        System.out.println("Take " + v);
+
         return v;
     }
 

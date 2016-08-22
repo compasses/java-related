@@ -79,6 +79,7 @@ public class Restaurant {
     Chef chef = new Chef(this);
     public Restaurant() {
         exec.execute(chef);
+
         exec.execute(waitPerson);
         exec.execute(waitPerson);
     }
