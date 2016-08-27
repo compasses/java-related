@@ -57,6 +57,42 @@ Maven 依赖管理 自动下载所需依赖到本地库；
 3. ReentrantLock与synchronized有相同的互斥性和内存可见性。但其更加灵活能提供更好的活跃性或性能。finally里面释放锁。
 4. ReentrantLock可以作为一种高级工具。当需要一些高级功能时才应该使用ReentrantLock。功能包括：可定时的、可轮询的与可中断的锁获取操作，公平队列，以及非块结构的锁。否则，还是应该悠闲使用synchronized。
 5. 读写锁允许多个线程并发地访问被保护的对象。当访问以读取操作为主的数据结构时，它能提供程序的可伸缩性。
+6. 锁与原子变量的性能对比，在中低程度的竞争下，原子变量能提供更高的可伸缩性，在高强度的竞争下，锁能够有效地避免竞争。
+7. 同步将限制编译器、运行时和硬件对内存操作重排序的方式，从而在实施重排序时不会破坏JMM提供的可见性保证。
+8. 静态初始化器是在类的初始化阶段进行。即在类被加载后，线程使用之前。JVM在初始化期间将会获得一个锁，内存写入将会对所有的线程可见。这里提供了对单例模式的一种实现方式：
+使用提前初始化，来避免同步开销。
+
+```
+public class EagerInitialization {
+  private static Resource resource = new Resource();
+
+  public static Resource getResource() {
+      return resource;
+  }
+
+  static class Resource {
+  }
+}
+```
+
+还有一种延迟初始化，到真正使用的时候开始加载资源：
+```
+public class ResourceFactory {
+    private static class ResourceHolder {
+        public static Resource resource = new Resource();
+    }
+
+    public static Resource getResource() {
+        return ResourceFactory.ResourceHolder.resource;
+    }
+
+    static class Resource {
+    }
+}
+```
+### 实战Java高并发程序设计
+1. 指令重排序，是为了提升CPU的执行流水线获取更好的性能。
+
 
 ## 深入java虚拟机
 
