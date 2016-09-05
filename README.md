@@ -92,6 +92,16 @@ public class ResourceFactory {
 ```
 ### 实战Java高并发程序设计
 1. 指令重排序，是为了提升CPU的执行流水线获取更好的性能。
+#### JDK 并发包
+1. 重入锁
+  1. ReentrantLock，中断响应，锁申请等待限时，公平锁。
+  2. Condition，重入锁的好搭档。JDK内部重入锁和Condition被大量使用，例如ArrayBlockingQueue
+  3. Semaphore ，允许多个线程同时访问。
+  4. ReadWriteLock 读写锁。读多写少的场景性能提升有很大帮助。
+  5. CountDownLatch 是一个非常实用的多线程控制工具类。
+  6. CyclicBarrier 是另外一种多线程并发控制实用工具。和CountDownLatch类似，也可以实现线程间的计数等待。通过调用CyclicBarrier.await()进入等待。当等待数量达到初始设置的数目时才能继续往下走。当等待计数器达到目标值时，等待CyclicBarrier的线程被唤醒之前执行可以执行一个Runnable任务。构造函数：**public CyclicBarrier(int parties, Runnable barrierAction)**
+  7. LockSupport 线程阻塞工具。
+
 
 
 ## 深入java虚拟机
