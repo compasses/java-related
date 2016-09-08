@@ -101,6 +101,12 @@ public class ResourceFactory {
   5. CountDownLatch 是一个非常实用的多线程控制工具类。
   6. CyclicBarrier 是另外一种多线程并发控制实用工具。和CountDownLatch类似，也可以实现线程间的计数等待。通过调用CyclicBarrier.await()进入等待。当等待数量达到初始设置的数目时才能继续往下走。当等待计数器达到目标值时，等待CyclicBarrier的线程被唤醒之前执行可以执行一个Runnable任务。构造函数：**public CyclicBarrier(int parties, Runnable barrierAction)**
   7. LockSupport 线程阻塞工具。
+2. 并发容器
+  1. ConcurrentHashMap:
+  2. CopyOnWriteArrayList:
+  3. ConcurrentLinkedQueue:
+  4. BlockingQueue:
+  5. ConcurrentSkipListMap:
 
 
 
@@ -191,6 +197,22 @@ class Example{
 2. static methods 支持。
 ## New Date and Time API
 Domain-driven design and Immutability-for thread safe
+
+## 申明式 & 命令式
+1. 申明式的编程范式 Declarative：你不需要提供明确的指令操作，所有的细节指令将会更好地被程序库所封装，你要做的只是提出你的要求，申明你的用意；
+2. 命令式的编程方式 Imperative：就是目前的规规矩矩的编程方式，使用大量可变对象和指令，并不断修改状态和值。
+用个遍历数组例子说明：
+```
+public static void imperative(int arrs[]) {
+  for （int i = 0 ; i < arrs.lenght; i++）{
+    System.out.println(arrs[i]);
+  }
+}
+
+public static void declarative(int arrs[]) {
+  Arrays.stream(arrs).forEach(System.out.println)
+}
+```
 
 ## CompletableFuture
 可以声明式的处理和合并多个异步任务。
