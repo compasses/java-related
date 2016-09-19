@@ -101,6 +101,8 @@ public class ResourceFactory {
   5. CountDownLatch 是一个非常实用的多线程控制工具类。
   6. CyclicBarrier 是另外一种多线程并发控制实用工具。和CountDownLatch类似，也可以实现线程间的计数等待。通过调用CyclicBarrier.await()进入等待。当等待数量达到初始设置的数目时才能继续往下走。当等待计数器达到目标值时，等待CyclicBarrier的线程被唤醒之前执行可以执行一个Runnable任务。构造函数：**public CyclicBarrier(int parties, Runnable barrierAction)**
   7. LockSupport 线程阻塞工具。
+  8. StampedLock 提供了一种乐观的读策略。这种乐观的锁非常类似无锁的操作，使得乐观锁完全不会阻塞写线程。通过使用乐观锁来增加系统的并行度。
+
 2. 并发容器
   1. ConcurrentHashMap:
   2. CopyOnWriteArrayList:
