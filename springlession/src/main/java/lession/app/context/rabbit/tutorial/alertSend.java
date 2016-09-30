@@ -16,10 +16,10 @@ public class alertSend {
 
     public static void main(String[] argv) throws java.io.IOException, TimeoutException {
         ConnectionFactory connectionFactory = new ConnectionFactory();
-        connectionFactory.setHost("localhost");
-        connectionFactory.setPort(56672);
-        connectionFactory.setUsername("root");
-        connectionFactory.setPassword("Initial0");
+        connectionFactory.setHost("10.128.165.206");
+        connectionFactory.setPort(5672);
+//        connectionFactory.setUsername("root");
+//        connectionFactory.setPassword("Initial0");
         Connection connection = connectionFactory.newConnection();
         Channel channel = connection.createChannel();
 
@@ -30,7 +30,7 @@ public class alertSend {
 
         channel.queueDeclare(LIMIT_QUEUE, false, false, false, null);
         channel.queueBind(LIMIT_QUEUE, EXCHANGE_NAME, "#.rate_limit");
-        for (int i = 0; i < 200;) {
+        for (int i = 0; i < 2;) {
             String message = "Critical happend";
             message += i++;
 
@@ -40,6 +40,8 @@ public class alertSend {
             message += i++;
 
             channel.basicPublish(EXCHANGE_NAME, LIMIT_QUEUE, MessageProperties.TEXT_PLAIN, message.getBytes());
+            System.out.println(" [x] Sent '" + LIMIT_QUEUE + "':'" + message + "'");
+
         }
 
 

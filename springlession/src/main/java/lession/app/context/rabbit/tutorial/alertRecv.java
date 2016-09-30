@@ -63,8 +63,8 @@ public class alertRecv {
         ConnectionFactory connectionFactory = new ConnectionFactory();
         connectionFactory.setHost("10.128.165.206");//10.128.165.206
         connectionFactory.setPort(5672);
-        connectionFactory.setUsername("test");
-        connectionFactory.setPassword("test");
+//        connectionFactory.setUsername("test");
+//        connectionFactory.setPassword("test");
 
         Connection connection = connectionFactory.newConnection();
         Channel channel = connection.createChannel();

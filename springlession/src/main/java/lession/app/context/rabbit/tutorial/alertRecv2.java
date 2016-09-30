@@ -96,10 +96,10 @@ public class alertRecv2 {
     }
     public static void main(String[] argv) throws java.io.IOException, TimeoutException {
         ConnectionFactory connectionFactory = new ConnectionFactory();
-        connectionFactory.setHost("localhost");//10.128.165.206
-        connectionFactory.setPort(56672);
-        connectionFactory.setUsername("root");
-        connectionFactory.setPassword("Initial0");
+        connectionFactory.setHost("10.128.165.206");//10.128.165.206
+        connectionFactory.setPort(5672);
+//        connectionFactory.setUsername("root");
+//        connectionFactory.setPassword("Initial0");
 
         Connection connection = connectionFactory.newConnection();
         Channel channel = connection.createChannel();
@@ -118,6 +118,6 @@ public class alertRecv2 {
 
 
         channel.basicConsume(CRITICAL_QUEUE, false, new alertRecv2.CriticalConsumer(channel, threadPool));
-        channel.basicConsume(LIMIT_QUEUE, false, new alertRecv2.RateLimitConsumer(channel, threadPool));
+        //channel.basicConsume(LIMIT_QUEUE, false, new alertRecv2.RateLimitConsumer(channel, threadPool));
     }
 }
