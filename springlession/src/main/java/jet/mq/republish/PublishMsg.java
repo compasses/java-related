@@ -26,7 +26,7 @@ import java.util.concurrent.TimeoutException;
 @EnableAutoConfiguration
 public class PublishMsg {
     private static final Logger logger = Logger.getLogger(alertRecv.class);
-    private static final String EXCHANGE_NAME = "ProductElastic";
+    public static final String EXCHANGE_NAME = "ProductElastic";
     public static final String ELASTICQUEUENAME = "elasticQueue";
     public static final String ROUTING_KEY = "elastic.product.#";
     private DataSource dataSource;
@@ -37,16 +37,16 @@ public class PublishMsg {
 
     public PublishMsg() throws java.io.IOException, TimeoutException {
         ConnectionFactory connectionFactory = new ConnectionFactory();
-        connectionFactory.setHost("10.128.165.206");
-        connectionFactory.setPort(5672);
-//        connectionFactory.setUsername("root");
-//        connectionFactory.setPassword("Initial0");
+        connectionFactory.setHost("localhost");
+        connectionFactory.setPort(56672);
+        connectionFactory.setUsername("root");
+        connectionFactory.setPassword("Initial0");
         com.rabbitmq.client.Connection connection = connectionFactory.newConnection();
         this.channel = connection.createChannel();
         //
         this.channel.exchangeDeclare(EXCHANGE_NAME, "topic", false);
-        channel.queueDeclare(ELASTICQUEUENAME, false, false, false, null);
-        channel.queueBind(ELASTICQUEUENAME, EXCHANGE_NAME, ROUTING_KEY);
+        //channel.queueDeclare(ELASTICQUEUENAME, false, false, false, null);
+       //channel.queueBind(ELASTICQUEUENAME, EXCHANGE_NAME, "Product.#");
     }
 
     public static void main( String[] args ) throws java.io.IOException, TimeoutException {
@@ -127,7 +127,7 @@ public class PublishMsg {
         }
 
         try {
-            this.channel.basicPublish(EXCHANGE_NAME, ROUTING_KEY,
+            this.channel.basicPublish(EXCHANGE_NAME, routingKey,
                     new AMQP.BasicProperties.Builder()
                     .contentType("application/json")
 //                    .deliveryMode(2)
