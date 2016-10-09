@@ -24,8 +24,12 @@ public class ProductController {
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/query")
-    public String doQuery(@RequestBody String body) {
+    public String doQuery(@RequestParam Long tenantId, @RequestBody String body) {
+        return productService.query(tenantId, body);
+    }
 
-        return "";
+    @RequestMapping(method = RequestMethod.GET, value = "/count")
+    public String doCount(@RequestParam Long tenantId) {
+        return productService.count(tenantId);
     }
 }

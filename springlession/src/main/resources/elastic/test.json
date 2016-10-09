@@ -1,0 +1,20 @@
+{   "settings": {
+      "number_of_shards": 15,
+      "number_of_replicas": 1
+    },
+      "mappings": {
+        "product": {
+          "dynamic":      "strict",
+          "_routing": {"required": true},
+          "properties": {
+            "code": {
+              "type": "string",
+              "index": "not_analyzed"
+            },
+            "id":{
+              "type": "long"
+            }
+          }
+        }
+      }
+    }

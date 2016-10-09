@@ -69,4 +69,5 @@ public class IndexService {
             throw new ElasticAPIException("Error creating new index", e);
         }
     }
+
 }

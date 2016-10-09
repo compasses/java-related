@@ -3,6 +3,7 @@ package jet.mq.elastic.document;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.MapType;
 import com.fasterxml.jackson.databind.type.TypeFactory;
+import com.oracle.tools.packager.IOUtils;
 import jet.mq.elastic.common.ElasticAPIException;
 import jet.mq.elastic.common.ElasticQueryException;
 import org.apache.http.HttpEntity;
@@ -15,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.io.StringWriter;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -35,6 +37,62 @@ public class DocumentService {
         this.client = client;
         this.jacksonObjectMapper = jacksonObjectMapper;
     }
+
+    public String count(String index, String type, Long tenantId) {
+        HashMap<String, String> params = new HashMap<>();
+        params.put("routing", tenantId.toString());
+        try {
+            Response response = client.performRequest(
+                    "POST",
+                    index + "/" + type + "/_count",
+                    params,
+                    null);
+
+            int statusCode = response.getStatusLine().getStatusCode();
+            if (statusCode > 299) {
+                logger.warn("Problem while indexing a document: {}", response.getStatusLine().getReasonPhrase());
+                throw new ElasticAPIException("Could not index a document, status code is " + statusCode);
+            }
+            logger.info("Got response :{}", response.getEntity().toString());
+            Long length = response.getEntity().getContentLength();
+
+            byte[] res = new byte[length.intValue()];
+            response.getEntity().getContent().read(res);
+            return new String(res);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return "Error happen";
+    }
+
+    public String doQuery(String index, String type, Long tenantId, String body) {
+        HashMap<String, String> params = new HashMap<>();
+        params.put("routing", tenantId.toString());
+        HttpEntity requestBody = new StringEntity(new String(body), Charset.defaultCharset());
+        try {
+            Response response = client.performRequest(
+                    "POST",
+                    index + "/" + type,
+                    params,
+                    requestBody);
+
+            int statusCode = response.getStatusLine().getStatusCode();
+            if (statusCode > 299) {
+                logger.warn("Problem while indexing a document: {}", response.getStatusLine().getReasonPhrase());
+                throw new ElasticAPIException("Could not index a document, status code is " + statusCode);
+            }
+            logger.info("Got response :{}", response.getEntity().toString());
+            Long length = response.getEntity().getContentLength();
+
+            byte[] res = new byte[length.intValue()];
+            response.getEntity().getContent().read(res);
+            return new String(res);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return "Error happen";
+    }
+
 
     public void StoreProduct(String index, String type, Long tenantId, byte[] bytes) {
         TypeFactory typeFactory = jacksonObjectMapper.getTypeFactory();
@@ -58,8 +116,6 @@ public class DocumentService {
            Response response;
            HashMap<String, String> params = new HashMap<>();
            params.put("routing", tenantId.toString());
-
-
 
            response = client.performRequest(
                    "POST",

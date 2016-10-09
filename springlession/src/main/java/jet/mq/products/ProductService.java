@@ -51,6 +51,14 @@ public class ProductService {
         }
     }
 
+    public String count(Long tenantId) {
+        return documentService.count(INDEX, TYPE, tenantId);
+    }
+
+    public String query(Long tenantId, String body) {
+        return documentService.doQuery(INDEX, TYPE, tenantId, body);
+    }
+
     public void storeMsgFromMQ(byte[] body) {
         //HashMap<String, Object> products = new HashMap<>();
 
@@ -155,6 +163,7 @@ public class ProductService {
 
         //channel.basicConsume(PublishMsg.ELASTICQUEUENAME, false, new ProductService.CommonConsumer(channel));
     }
+
     public void consumeMsg() throws TimeoutException, IOException {
         ConnectionFactory connectionFactory = new ConnectionFactory();
         connectionFactory.setHost("localhost");//10.128.165.206
@@ -183,5 +192,4 @@ public class ProductService {
         //startChanel(connection);
         logger.warn(stats.toString());
     }
-
 }
