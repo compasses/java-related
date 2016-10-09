@@ -28,6 +28,7 @@ public class ProductService {
     private static Logger logger = Logger.getLogger(ProductService.class);
     public static final String INDEX = "onlinestore";
     private static final String TYPE = "product";
+    protected HashMap<String, Integer> stats = new HashMap<>();
 
     private final IndexService indexService;
     private final DocumentService documentService;
@@ -52,7 +53,16 @@ public class ProductService {
 
     public void storeMsgFromMQ(byte[] body) {
         //HashMap<String, Object> products = new HashMap<>();
+
         documentService.StoreOriginal(INDEX, TYPE, body);
+    }
+
+    public HashMap<String, Integer> getStats() {
+        return stats;
+    }
+
+    public void setStats(HashMap<String, Integer> stats) {
+        this.stats = stats;
     }
 
     class CriticalConsumer extends DefaultConsumer {
@@ -70,6 +80,18 @@ public class ProductService {
 //                    " BasicProperties: " + properties);
             Channel channel = this.getChannel();
             String routingKey = envelope.getRoutingKey();
+            String[] vals = routingKey.split("\\.");
+            if (vals.length < 3) {
+                logger.warn("Not valid message :" + new String(body));
+                return;
+            }
+            if (stats.containsKey(vals[1])) {
+                Integer iv = stats.get(vals[1]);
+                stats.replace(vals[1], ++iv);
+            } else {
+                stats.put(vals[1], 1);
+            }
+
             int  number = 0;
             try {
                 logger.info(String.format("Received (channel %d) %s", channel.getChannelNumber(), routingKey));
@@ -77,7 +99,7 @@ public class ProductService {
                 threadPool.submit(new Runnable() {
                     public void run() {
                         try {
-                            documentService.StoreOriginal(INDEX, TYPE, body);
+                            documentService.StoreProduct(INDEX, TYPE, Long.parseLong(vals[2]), body);
                             channel.basicAck(envelope.getDeliveryTag(), false);
                         } catch (IOException e) {
                             e.printStackTrace();
@@ -159,6 +181,7 @@ public class ProductService {
 
         startChanel(channel1, queueName);
         //startChanel(connection);
+        logger.warn(stats.toString());
     }
 
 }

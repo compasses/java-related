@@ -1,11 +1,11 @@
 {
-  "onlinestore": {
     "settings": {
       "number_of_shards": 15,
       "number_of_replicas": 1
     },
     "mappings": {
       "product": {
+        "dynamic":  "true",
         "_routing": {"required": true},
         "properties": {
           "attributes": {
@@ -74,8 +74,19 @@
           "height": {
             "type": "long"
           },
-          "channelIds": {
-            "type": "long"
+          "channels": {
+            "type": "nested",
+            "properties": {
+              "channelId":{
+                "type": "long"
+              },
+              "RMB": {
+                "type": "double"
+              },
+              "USD": {
+                "type": "double"
+              }
+            }
           },
           "id": {
             "type": "long"
@@ -256,5 +267,4 @@
         }
       }
     }
-  }
 }
