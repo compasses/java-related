@@ -32,6 +32,40 @@
               }
             }
           },
+          "channels": {
+            "type": "nested",
+            "properties": {
+              "channelId":{
+                "type": "long"
+              },
+              "RMB": {
+                "type": "double"
+              },
+              "USD": {
+                "type": "double"
+              }
+            }
+          },
+          "static_collection":{
+            "type": "long"
+          },
+          "categories": {
+            "type": "long"
+          },
+          "category": {
+            "properties": {
+              "chain": {
+                "type": "string",
+                "index": "not_analyzed"
+              },
+              "id": {
+                "type": "long"
+              },
+              "name": {
+                "type": "string"
+              }
+            }
+          },
           "backOrderAllowed": {
             "type": "boolean"
           },
@@ -45,8 +79,7 @@
                 "type": "long"
               },
               "name": {
-                "type": "string",
-                "index": "not_analyzed"
+                "type": "string"
               }
             }
           },
@@ -73,20 +106,6 @@
           },
           "height": {
             "type": "long"
-          },
-          "channels": {
-            "type": "nested",
-            "properties": {
-              "channelId":{
-                "type": "long"
-              },
-              "RMB": {
-                "type": "double"
-              },
-              "USD": {
-                "type": "double"
-              }
-            }
           },
           "id": {
             "type": "long"
@@ -153,18 +172,15 @@
                 "type": "long"
               },
               "name": {
-                "type": "string",
-                "index": "not_analyzed"
+                "type": "string"
               }
             }
           },
           "model": {
-            "type": "string",
-            "index": "not_analyzed"
+            "type": "string"
           },
           "name": {
-            "type": "string",
-            "index": "not_analyzed"
+            "type": "string"
           },
           "productTaxClass": {
             "properties": {
@@ -179,8 +195,7 @@
                 "type": "long"
               },
               "name": {
-                "type": "string",
-                "index": "not_analyzed"
+                "type": "string"
               }
             }
           },
@@ -190,8 +205,7 @@
                 "type": "long"
               },
               "name": {
-                "type": "string",
-                "index": "not_analyzed"
+                "type": "string"
               }
             }
           },
@@ -201,8 +215,7 @@
                 "type": "long"
               },
               "name": {
-                "type": "string",
-                "index": "not_analyzed"
+                "type": "string"
               }
             }
           },
@@ -216,8 +229,7 @@
                 "type": "long"
               },
               "name": {
-                "type": "string",
-                "index": "not_analyzed"
+                "type": "string"
               },
               "status": {
                 "type": "string",
@@ -250,8 +262,7 @@
                 "type": "long"
               },
               "name": {
-                "type": "string",
-                "index": "not_analyzed"
+                "type": "string"
               }
             }
           },
@@ -264,6 +275,11 @@
           "width": {
             "type": "long"
           }
+        }
+      },
+      "sku": {
+        "_parent": {
+          "type": "product"
         }
       }
     }

@@ -59,7 +59,7 @@ public class TreeMapper {
     public static void main(String[] args) throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
 
-        JsonNode jsonNode = objectMapper.readTree(new File("resources.json"));
+        JsonNode jsonNode = objectMapper.readTree(new File("../jsonx/data/resources.json"));
         IterateJsonNode(jsonNode);
 //        System.out.println(jsonNode.getNodeType());
 //        System.out.println(jsonNode.isContainerNode());

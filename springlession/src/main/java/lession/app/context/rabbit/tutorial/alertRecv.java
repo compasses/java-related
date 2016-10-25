@@ -1,6 +1,7 @@
 package lession.app.context.rabbit.tutorial;
 
 import com.rabbitmq.client.*;
+import jet.mq.republish.PublishMsg;
 import org.apache.log4j.*;
 
 
@@ -15,6 +16,7 @@ public class alertRecv {
     private static final String EXCHANGE_NAME = "logs";
     private static final String CRITICAL_QUEUE = "critical";
     private static final String LIMIT_QUEUE = "rate_limit";
+    private static int number = 0;
 
     private static final Logger logger = Logger.getLogger(alertRecv.class);
 
@@ -30,10 +32,11 @@ public class alertRecv {
             String message = new String(body, "UTF-8");
 //            logger.info("consumertag: " + consumerTag + " Envelope : " + envelope.toString() +
 //            " BasicProperties: " + properties);
-            //thisChannel.basicAck(envelope.getDeliveryTag(), false);
             logger.info(" [x] Critical Received '" + message + "'");
             try {
+                number++;
                 this.getChannel().basicAck(envelope.getDeliveryTag(), false);
+                logger.info("received :" + number);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -70,15 +73,15 @@ public class alertRecv {
         Channel channel = connection.createChannel();
 
         //
-//        channel.exchangeDeclare(EXCHANGE_NAME, "topic", false);
-//        channel.queueDeclare(CRITICAL_QUEUE, false, false, true, null);
-//        channel.queueBind(CRITICAL_QUEUE, EXCHANGE_NAME, "critical.#");
+        channel.exchangeDeclare(PublishMsg.EXCHANGE_NAME, "topic");
+        channel.queueDeclare(CRITICAL_QUEUE, false, false, false, null);
+        channel.queueBind(CRITICAL_QUEUE, PublishMsg.EXCHANGE_NAME, "Product.#");
 //
 //        channel.queueDeclare(LIMIT_QUEUE, false, false, true, null);
 //        channel.queueBind(LIMIT_QUEUE, EXCHANGE_NAME, "#.rate_limit");
 
 
         channel.basicConsume(CRITICAL_QUEUE, false, new CriticalConsumer(channel));
-        channel.basicConsume(LIMIT_QUEUE, false, new RateLimitConsumer(channel));
+        //channel.basicConsume(LIMIT_QUEUE, false, new RateLimitConsumer(channel));
     }
 }

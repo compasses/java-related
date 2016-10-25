@@ -1,8 +1,4 @@
-package lession.app.context;
-
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.stereotype.Component;
+package elastic.context;
 
 /**
  * Created by I311352 on 8/12/2016.

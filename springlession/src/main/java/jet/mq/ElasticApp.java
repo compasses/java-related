@@ -2,10 +2,15 @@ package jet.mq;
 
 import com.rabbitmq.client.*;
 import jet.mq.elastic.index.IndexService;
+import jet.mq.messageconsume.MQ_Constants;
 import jet.mq.products.ProductService;
 import jet.mq.republish.PublishMsg;
 import lession.app.context.rabbit.tutorial.alertRecv2;
 import org.apache.log4j.Logger;
+import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.rabbit.connection.*;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
+import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -26,19 +31,23 @@ public class ElasticApp {
         ConfigurableApplicationContext context = SpringApplication.run(ElasticApp.class, args);
         IndexService indexService = context.getBean(IndexService.class);
         ProductService productService = context.getBean(ProductService.class);
-        if (!indexService.indexExist(ProductService.INDEX)) {
+        //if (!indexService.indexExist(ProductService.INDEX)) {
             productService.createIndex();
-        }
+        //}
+        MQ_Constants.InitialRoutingHandler(context);
 
-        try {
-            productService.consumeMsg();
-        } catch (IOException e) {
-            logger.error("Error on consume msg", e);
-        } catch (TimeoutException e) {
-            logger.error("Error on consume timeout", e);
-        }
+
+//        try {
+//            productService.consumeMsg();
+//        } catch (IOException e) {
+//            logger.error("Error on consume msg", e);
+//        } catch (TimeoutException e) {
+//            logger.error("Error on consume timeout", e);
+//        }
 
     }
+
+
 
 }
 
