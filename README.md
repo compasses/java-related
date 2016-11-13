@@ -111,6 +111,55 @@ public class ResourceFactory {
   5. ConcurrentSkipListMap:
 
 
+## Java 性能优化权威指南
+### HotSpot VM
+1. 64位的VM可以使用更多的内存，但也带来了性能损失。因java对象的oops（对象指针）从32位变成64位，导致CPU高速缓存中可用的oops变少，从而降低了CPU缓存效率。可以使用-XX:+UseCompressedOops.
+### HotSpot VM 运行时
+1. 命令行选项：
+  1. VM启动器使用的，例如指定哪个JIT编译器，选择何种垃圾收集器等。还有一些是启动器处理完成后传给完成启动的HotSpot VM，例如指定Java堆的大小。
+  2. 三类标准选项，非标准选项、非稳定选项；非标准选项以-X为前缀；非稳定选项以-XX为前缀。
+2. VM生命周期
+  VM的启动是被启动器启动的，流程：
+  1. 解析命令行选项；
+  2. 设置堆大小和JIT编译器；
+  3. 设定环境变量，LD_LIBRARY_PATH 和 CLASSPATH；
+  4. 如果命令行有 -jar选项，启动器从指定JAR的manifest中查找Main-Class，否则从命令行查找。
+  5. 使用本地标准Java接口方法JNI_CreateJavaVM在新建的线程中创建VM。
+  6. 一旦创建并初始化好HotSpot VM，就会加载Java Main-Class，启动器也会从Java Main-Class中得到Java main方法的参数。
+  7. HotSpot VM通过JNI方法CallStaticVoidMethod调用Java main方法。并将命令行选项传给他。
+3. VM类加载
+类加载用以描述类名或者接口名映射到类（Class）对象的过程。类加载的三个阶段，加载、链接、初始化。
+  1. 类加载阶段；首先根据类名找到对应的Java类的文件，加载前会加载它自己的超类或超接口，并进行类的格式语法检查；链接第一步是验证，检查类文件的语义、常量池符号以及类型。下一步是创建静态字段，初始化为默认值，分配方法表。接下来解析符号引用。然后初始化类，运行类构造器。性能优化考虑，直到类初始化时，HotSpot VM才会加载和链接类。
+  2. 类加载器委派
+  3. 启动类加载器：负责加载BOOTCLASSPATH路径中的类，如rt.jar。
+  4. 类型安全；java类或接口的名字为全限定名，包括包名。java类型由全限定名和类加载器唯一确定。
+  5. HotSpot 类元数据。HotSpot VM会在永久代创建类的内部表示：instanceKlass或者arrayKlass。instanceKlass引用了与之对应的java.lang.Class实例。VM内部使用klassOop的数据结构访问instanceKlass。
+  6. VM内部的类加载数据：三张散列表：SystemDictionary包含已经加载的类，建立类名/类加载器与klassOpp对象之前的映射。PlaceHolder-Table包含正在加载的类。用于检查ClassCircularError。LoaderConstraintTable用于追踪安全类型检查的约束条件。这些散列表都需要加锁用于保证访问安全。SystemDictionary_lock。
+4. 字节码验证；VM在链接时必须进行字节码验证以保障类型安全。
+5. 类数据共享；java 5引入，可以缩短Java程序的启动时间和内存占用。
+6. 解释器；是一个基于模板的解释器，模板TemplateTable定义了每个字节码对应的机器码。也是自适应优化的重要部分。避免编译那些很少执行的代码。
+7. 异常处理；由VM解释器、JIT编译器和其他VM组件一起协作实现。主要有两种情形，同一方法中抛出和捕获异常，或由调用方法捕获异常。后一种方法更为复杂，需要退栈才能找到合适的异常处理器。三类信息用于查找异常处理器当前方法、当前字节码和异常对象。如果在当前方法中没有找到异常处理器，当前的活动栈帧就会退栈，直到找到异常处理器。
+8. 同步；HotSpot VM 吸收了非竞争性和竞争性同步操作的最先进技术，极大地提高了同步性能。大多数同步为非竞争性同步，可以在常量时间内完成。偏向锁可以允许线程自身使用偏向锁。HotSpot VM有两个编译器和一个解释器，-clientJIT C1，-serverJIT C2。C1和C2在同步点时都可以直接生成fast-path代码。没有竞争时，同步操作通常全部在fast-path代码中完成。如果需要阻塞或者唤醒线程时，fast-path代码会调用slow-path代码，slow-path代码是由C++实现，而fast-path代码则是由JIT编译器产生的机器代码。HotSpot VM内部表示java对象的第一个字，包含了Java对象的同步状态编码。包含以下：
+    1. 中立；已解锁。
+    2. 偏向；已锁定、已解锁且无共享。
+    3. 栈锁；已锁定且共享，但非竞争。
+    4. 膨胀；已锁定、已解锁且共享和竞争。
+9. 线程管理；
+    1. 线程模型；java线程java.lang.Thread被一对一映射为本地操作系统线程。
+
+
+
+### JVM 优化选项
+  1. -XX:AggressiveOpts
+  2. -XX:DoEscapeAnalysis，开启逃逸分析。借助逃逸分析，HotSpot虚拟机的JIT编译器可以应用下面任何一种技术。
+      1. 对象展开；可能直接回收的空间而非Java堆上分配对象字段的技术。
+      2. 标量替换；减少内存访问的优化技术。
+      3. 栈上分配；非逃逸对象可以直接在线程栈帧上分配。
+      4. 消除同步；
+      5. 消除垃圾收集的读写屏障
+  3. -XX:+UseBiasedLocking；偏向锁，偏向于最后获取对象锁的线程优化技术。当只有一个线程锁定该对象，没有锁冲突的情况下，其锁开销可以接近lock-free。
+  4. -XX:+UseLargePages；使用大页可以有效减少TLB失效的几率。
+
 
 ## 深入java虚拟机
 
