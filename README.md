@@ -146,7 +146,33 @@ public class ResourceFactory {
     4. 膨胀；已锁定、已解锁且共享和竞争。
 9. 线程管理；
     1. 线程模型；java线程java.lang.Thread被一对一映射为本地操作系统线程。
+    2. 线程的创建和销毁。
+    3. 线程状态。
+      1. 线程转储、栈追踪信息，还需包括其他状态信息。
+        1. MONITOR_WAIT: 线程正在等待获取竞争的监视锁。
+        2. CONDVAR_WAIT: 线程等待VM内部使用的条件变量。
+        3. OBJECT_WAIT: java线程正在执行 java.lang.Object.wait()
+    4. VM 内部线程。
+      1. VM 线程，C++单例对象，负责执行VM操作；
+      2. 周期任务线程，C++单例对象，watcherthread，模拟计时器中断，使得可以在VM内部执行周期性任务。
+      3. 垃圾收集线程，有不同类型的收集线程，支持串行、并行、并发垃圾收集。
+      4. JIT编译器线程，进行运行时编译，将字节码编译成机器码。
+      5. 信号分发线程，这个线程等待进程发来的信号并将它们分发给Java信号处理方法。
+    5. VM操作和安全点
+    6. C++ 堆管理
+      1. 从基类Arena衍生出来的类负责管理VM C++堆的操作。
+      2. Arena是线程本地对象，会预先保留一定量的内存，这使得fast-path分配不需要全局共享锁。
+10. VM致命错误处理
+  1. OutOfMemoryError是常见的JVM 致命错误。
+  2. 常用的诊断手段：-XX:OnOutOfMemoryError=<cmd>; -XX:+HeapDumpOnOutOfMemory; -XX:HeapDump -Path=<pathname>
 
+### HotSpot VM 垃圾收集器
+1. 分代垃圾收集
+一个minor GC的过程：
+![minorGC](./minorGC.jpg)
+2. 快速内存分配
+  1. Eden中运用被称为指针碰撞的技术可以有效的地分配空间，只需要检查Eden中的当前top和Eden末端之前的空间是否能够容纳。
+  2. TLAB Thread-Local Allocation Buffer，加速线程的内存分配。线程从TLAB中分配对象不需要任何锁，而当TLAB空间不足时，就会使用全局锁了。
 
 
 ### JVM 优化选项
