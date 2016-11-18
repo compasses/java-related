@@ -21,13 +21,18 @@ import java.util.HashMap;
  * Created by I311352 on 10/14/2016.
  */
 @Service
-public class ProductDocService extends DocumentService {
+public class ProductDocService extends DocumentService implements ExtractUpdateFields<JsonObject, JsonObject> {
     public static final Logger logger = Logger.getLogger(ProductDocService.class);
     JsonParser jsonParser = new JsonParser();
 
     @Autowired
     public ProductDocService(RestClient restClient, Gson gson) {
         super(restClient, gson);
+    }
+
+    @Override
+    public JsonObject getUpdateFields(JsonObject jsonObject) {
+        return null;
     }
 
     public void RemoveProudct(Long tenantId, byte[] body) {

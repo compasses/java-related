@@ -152,6 +152,36 @@ public class DocumentService {
         return "Error happen";
     }
 
+    public void testQuery() {
+//http://10.128.161.107:9200/stores/product/_search?routing=&size=100&from=314&fields=id
+        HashMap<String, String> params = new HashMap<>();
+        params.put("routing", "19279769849216");
+        params.put("size", "100");
+        params.put("from", "314");
+        params.put("fields", "id");
+        try {
+            Response response = client.performRequest(
+                    "GET",
+                    "stores/product/_search",
+                    params);
+
+            int statusCode = response.getStatusLine().getStatusCode();
+            if (statusCode > 299) {
+                logger.warn("Problem while indexing a document: {}", response.getStatusLine().getReasonPhrase());
+                throw new ElasticAPIException("Could not index a document, status code is " + statusCode);
+            }
+            logger.info("Got response :{}", response.getEntity().toString());
+            Long length = response.getEntity().getContentLength();
+            byte[] res = new byte[length.intValue()];
+            response.getEntity().getContent().read(res);
+            String result = new String(res);
+            ESQueryResponse esQueryResponse = gson.fromJson(result, ESQueryResponse.class);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public String doQuery(String index, String type, Long tenantId, String body) {
         HashMap<String, String> params = new HashMap<>();
         params.put("routing", tenantId.toString());

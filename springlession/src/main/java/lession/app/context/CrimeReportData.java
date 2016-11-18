@@ -1,4 +1,4 @@
-package elastic.context;
+package lession.app.context;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;

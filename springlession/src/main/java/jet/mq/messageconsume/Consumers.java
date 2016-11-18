@@ -17,34 +17,34 @@ import java.util.Arrays;
  */
 @Service
 public class Consumers {
-    static {
-        ConnectionFactory cf = new CachingConnectionFactory("10.128.165.206", 5672);
-        RabbitAdmin admin = new RabbitAdmin(cf);
-
-        Queue queue = new Queue(MQ_Constants.ELASTICQUEUENAME, false);
-        admin.declareQueue(queue);
-
-        TopicExchange exchange = new TopicExchange(MQ_Constants.EXCHANGE_NAME);
-        admin.declareExchange(exchange);
-
-        Arrays.stream(MQ_Constants.routingMsg.keySet().toArray()).forEach(
-                name ->{
-                    admin.declareBinding(
-                            BindingBuilder.bind(queue).to(exchange).with((String) name));
-                }
-        );
-
-        // set up the listener and container
-        SimpleMessageListenerContainer container =
-                new SimpleMessageListenerContainer(cf);
-
-        MessageListenerAdapter adapter = new MessageListenerAdapter(SimpleListener.getInstance());
-
-        container.setMessageListener(adapter);
-        container.setQueueNames(MQ_Constants.ELASTICQUEUENAME);
-        container.setConcurrentConsumers(10);
-        container.start();
-    }
+//    static {
+//        ConnectionFactory cf = new CachingConnectionFactory("10.128.165.206", 5672);
+//        RabbitAdmin admin = new RabbitAdmin(cf);
+//
+//        Queue queue = new Queue(MQ_Constants.ELASTICQUEUENAME, false);
+//        admin.declareQueue(queue);
+//
+//        TopicExchange exchange = new TopicExchange(MQ_Constants.EXCHANGE_NAME);
+//        admin.declareExchange(exchange);
+//
+//        Arrays.stream(MQ_Constants.routingMsg.keySet().toArray()).forEach(
+//                name ->{
+//                    admin.declareBinding(
+//                            BindingBuilder.bind(queue).to(exchange).with((String) name));
+//                }
+//        );
+//
+//        // set up the listener and container
+//        SimpleMessageListenerContainer container =
+//                new SimpleMessageListenerContainer(cf);
+//
+//        MessageListenerAdapter adapter = new MessageListenerAdapter(SimpleListener.getInstance());
+//
+//        container.setMessageListener(adapter);
+//        container.setQueueNames(MQ_Constants.ELASTICQUEUENAME);
+//        container.setConcurrentConsumers(10);
+//        container.start();
+//    }
 
 
 }
