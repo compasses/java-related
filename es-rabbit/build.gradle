@@ -20,7 +20,8 @@ apply plugin: 'java'
 apply plugin: 'application'
 apply plugin: 'idea'
 apply plugin: 'maven'
-apply plugin: 'spring-boot'
+apply plugin: 'org.springframework.boot'
+//mainClassName = 'event.RabbitMQApp'
 
 jar {
     baseName = 'elastic-rabbit-job'
@@ -53,7 +54,7 @@ dependencies {
     compile 'joda-time:joda-time:2.2'
     compile 'com.google.code.gson:gson:2.7'
     compile 'com.rabbitmq:amqp-client:3.6.5'
-
+    compile 'commons-io:commons-io:2.4'
     compile 'com.sap.sme.anw:vault-common-java:1.0.0'
 
     // Declare the dependency for your favourite test framework you want to use in your tests.

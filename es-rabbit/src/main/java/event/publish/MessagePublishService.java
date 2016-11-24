@@ -6,14 +6,12 @@ import com.rabbitmq.client.ConnectionFactory;
 import com.sap.sme.vault.infra.ConfigurationProvider;
 import com.sap.sme.vault.infra.impl.ConfigurationProviderSingleton;
 import com.sap.sme.vault.infra.model.NameAndPwd;
-import event.RabbitMQApp;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
-import java.net.URL;
 import java.util.Properties;
 
 /**
@@ -49,8 +47,10 @@ public class MessagePublishService {
             String rabbitpwd = null;
             if (!rabbitFile.exists()) {
                 logger.info("Cannot find rabbitmq.properties in the production environment. Using local file!");
-                URL resource = RabbitMQApp.class.getClassLoader().getResource("rabbitmq.properties");
-                inputStream = new FileInputStream(resource.getFile());
+                inputStream = this.getClass().getResourceAsStream("/rabbit/rabbitmq.properties");
+//                String mapInfo = IOUtils.toString(inputStream);
+//                URL resource = RabbitMQApp.class.getClassLoader().getResource("");
+//                inputStream = new FileInputStream(resource.getFile());
                 props.load(inputStream);
                 rabbitusr = props.get("MQ_DB_USR").toString();
                 rabbitpwd = props.get("MQ_DB_PWD").toString();
@@ -74,6 +74,7 @@ public class MessagePublishService {
             rabbitFactory.setPassword(rabbitpwd);
             Long port = Long.valueOf(rabbitport);
             rabbitFactory.setPort(port.intValue());
+            logger.info("RabbitMQ connection: " + rabbithost + rabbitport + rabbitusr + rabbitpwd);
             Connection connection = rabbitFactory.newConnection();
             this.channel = connection.createChannel();
             this.channel.exchangeDeclare(EXCHANGE_NAME, "topic", true);
