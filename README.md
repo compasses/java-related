@@ -173,7 +173,25 @@ public class ResourceFactory {
 2. 快速内存分配
   1. Eden中运用被称为指针碰撞的技术可以有效的地分配空间，只需要检查Eden中的当前top和Eden末端之前的空间是否能够容纳。
   2. TLAB Thread-Local Allocation Buffer，加速线程的内存分配。线程从TLAB中分配对象不需要任何锁，而当TLAB空间不足时，就会使用全局锁了。
+3. 各个垃圾收集器的比较：
+![gcCompare](./gcCompare.jpg)
+4. 应用程序对垃圾收集器的影响
+  1. 内存分配
+  2. 存活数据的多少
+  3. 老年代的引用更新
+### HotSpot VM JIT编译器
+1. CHA：class hierarchy analysis。将方法进行智能内联，获取高性能的方法。
+2. Server JIT 和 client JIT
 
+### Java 应用性能分析
+1. 推荐使用NetBeans Profiler，简单免费易用。与IDE集成。
+
+### Java应用性能分析
+1. FileOutputStream 修改为 BufferedOutputStream。
+2. 避免锁的竞争：可使用ThreadLocal，使得每个线程一份。并发数据结构并不是不可触碰的圣杯。它依赖CAS操作，CAS也会利用一种同步机制，如果存在对原子变量有高度竞争的情况下，即使使用了并发技术和lock-free数据结构也不能避免槽糕的性能和伸缩性。
+3. volatile, 频繁更新或者写入volatile 字段有可能导致性能问题。
+4. 数据结构的使用，初始大小设定：StringBuilder StringBuffer。Collection类初始大小：ArrayList、Vector、HashMap、ConcurrentHashMap。
+5. 增加并行性，充分利用多核资源。
 
 ### JVM 优化选项
   1. -XX:AggressiveOpts
