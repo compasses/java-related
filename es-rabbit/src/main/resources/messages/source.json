@@ -9,7 +9,7 @@
       "routingKey":"SKU.CREATE"
     },
     {
-      "body":"[{\"propertyList\":[],\"channelId\":100265518161920,\"type\":\"CatalogSKU\",\"action\":\"LIST\",\"sourceId\":100239514009664,\"listIds\":[100239514837057],\"time\":1479541835006}]",
+      "body":"[{\"propertyList\":[],\"channelId\":105100812181504,\"type\":\"CatalogSKU\",\"action\":\"LIST\",\"sourceId\":100239514009664,\"listIds\":[100239514837057],\"time\":1479541835006}]",
       "routingKey":"CatalogSKU.LIST"
     },
     {
@@ -18,7 +18,7 @@
     }
   ],
   "messageHeader":{
-    "X-Tenant-ID": 25059768424256,
+    "X-Tenant-ID": 105100812181504,
     "X-User-ID": -1,
     "X-Employee-ID": -1
   }

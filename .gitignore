@@ -4,4 +4,6 @@
 /target/
 /**/target/*
 /spring-mvc-showcase/
-
+/**/build/*
+/**/gradle/*
+/**/.gradle/*
