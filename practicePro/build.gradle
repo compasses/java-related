@@ -1,0 +1,28 @@
+apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'idea'
+group = 'com.jet.he'
+version = '0.0.1-SNAPSHOT'
+
+description = """"""
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+tasks.withType(JavaCompile) {
+	options.encoding = 'UTF-8'
+}
+
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+    maven {
+        url 'http://nexus.smec/nexus/content/groups/allrepository'
+    }
+}
+
+dependencies {
+    compile group: 'org.springframework.boot', name: 'spring-boot-starter-web', version:'1.3.5.RELEASE'
+    testCompile group: 'org.jmockit', name: 'jmockit', version:'1.14'
+    testCompile group: 'junit', name: 'junit', version:'4.12'
+}
