@@ -24,14 +24,32 @@ POM 中，groupId, artifactId, packaging, version 叫作 maven 坐标，它能�
 Maven 依赖管理 自动下载所需依赖到本地库；
 
 2.mvn install. 会将包安装到本地库:~/.m2/repository
+
+# Gradle
+整体上Gradle比Maven更加面向程序员，因为可以通过代码来创建build流程，实现依赖关系的精确控制。使用起来也很方便，不会感到很繁琐，也能良好的兼容maven工程。
+
+Gradle的网络proxy设置，这是在使用中遇到的，因为公司网络要走proxy：
+
+```
+systemProp.http.proxyHost=proxy_host
+systemProp.http.proxyPort=proxy_port
+systemProp.http.proxyUser=global/I311352
+systemProp.http.proxyPassword=password
+
+systemProp.https.proxyHost=proxy_host
+systemProp.https.proxyPort=proxy_port
+systemProp.https.proxyUser=global/I311352
+systemProp.https.proxyPassword=password
+```
+
+另外就是很多开源的Java框架或者库之类的基本都是用Gradle，例如Spring，ElasticSearch等等。Gradle也能跟IntelliJ IDEA很好的结合起来。总之Gradle会越来越受欢迎。
+
 # IDE
 [IntelliJ IDEA](https://www.jetbrains.com/idea/download/#section=windows) community版，总体上比eclipse好用。
 
 
 # BOOKS
 ### [Thinking in Java](http://compasses.github.io/2016/07/26/book-review-thinking-in-java/)
-
-##
 
 ## Java 并发编程系列
 
@@ -62,7 +80,7 @@ Maven 依赖管理 自动下载所需依赖到本地库；
 8. 静态初始化器是在类的初始化阶段进行。即在类被加载后，线程使用之前。JVM在初始化期间将会获得一个锁，内存写入将会对所有的线程可见。这里提供了对单例模式的一种实现方式：
 使用提前初始化，来避免同步开销。
 
-```
+```java
 public class EagerInitialization {
   private static Resource resource = new Resource();
 
@@ -76,7 +94,7 @@ public class EagerInitialization {
 ```
 
 还有一种延迟初始化，到真正使用的时候开始加载资源：
-```
+```java
 public class ResourceFactory {
     private static class ResourceHolder {
         public static Resource resource = new Resource();
@@ -92,6 +110,9 @@ public class ResourceFactory {
 ```
 ### 实战Java高并发程序设计
 1. 指令重排序，是为了提升CPU的执行流水线获取更好的性能。
+
+
+
 #### JDK 并发包
 1. 重入锁
   1. ReentrantLock，中断响应，锁申请等待限时，公平锁。
@@ -203,6 +224,19 @@ public class ResourceFactory {
       5. 消除垃圾收集的读写屏障
   3. -XX:+UseBiasedLocking；偏向锁，偏向于最后获取对象锁的线程优化技术。当只有一个线程锁定该对象，没有锁冲突的情况下，其锁开销可以接近lock-free。
   4. -XX:+UseLargePages；使用大页可以有效减少TLB失效的几率。
+
+## Java性能权威指南
+### GC算法
+评估使用GC算法时要考虑的条件：
+1. 关注单个请求响应的时间，可以使用Concurrent收集器。
+2. 关注平均响应时间，采用Throughput收集器。
+3. Concurrent收集器会消耗更多的CPU。
+
+几个收集器：
+1. Serial：运行在Client型虚拟机上。通过-XX:+UseSerialGC开启。
+2. Throughput：Server级收集器，其使用多线程，也称为Parallel收集器。使用标志：-XX:+UseParallelGC、-XX:UseParallelOldGC开启。
+3. CMS收集器，解决Throughput收集器中Full GC的长时间停顿问题。使用-XX:+UseConcMarkSweepGC、-XX:+UseParNewGC开启。
+4. G1收集器，设计初衷是为了消除处理超大堆大于4G时产生的停顿。也属于Concurrent收集器，同CMS一样，避免Full GC的代价是消耗额外的CPU周期。通过-XX:+UseG1GC开启。
 
 
 ## 深入java虚拟机
