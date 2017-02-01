@@ -228,23 +228,65 @@ public class ResourceFactory {
 ## Java性能权威指南
 ### GC算法
 评估使用GC算法时要考虑的条件：
+
 1. 关注单个请求响应的时间，可以使用Concurrent收集器。
 2. 关注平均响应时间，采用Throughput收集器。
 3. Concurrent收集器会消耗更多的CPU。
 
 几个收集器：
+
 1. Serial：运行在Client型虚拟机上。通过-XX:+UseSerialGC开启。
 2. Throughput：Server级收集器，其使用多线程，也称为Parallel收集器。使用标志：-XX:+UseParallelGC、-XX:UseParallelOldGC开启。
 3. CMS收集器，解决Throughput收集器中Full GC的长时间停顿问题。使用-XX:+UseConcMarkSweepGC、-XX:+UseParNewGC开启。
 4. G1收集器，设计初衷是为了消除处理超大堆大于4G时产生的停顿。也属于Concurrent收集器，同CMS一样，避免Full GC的代价是消耗额外的CPU周期。通过-XX:+UseG1GC开启。
+    
+###堆内存最佳实践
+
+1. 了解哪些对象正在消耗内存，是了解要优化代码中哪些对象的第一步。
+2. HeapDump分析是追踪内存使用的最强大的技术。
+3. 对象的大小，普通对象，对象头字段在32位JVM上占8字节，在64位JVM上占16字节。对于数组，对象头字段在32位JVM以及堆小于32G的64位JVM上占16字节，其他情况都是64字节。
+4. 下面普通对象的大小是16字节，不管是否定义了变量i。
+    ```java
+    public class A {
+        private int i;
+    }
+    ```
+5. 延迟初始化，并尽早清理。
+    ```java
+    public class LatencyInitialization{
+       private volatile java.util.concurrent.ConcurrentHashMap hashMap;
+       public void doOperation() {
+           java.util.concurrent.ConcurrentHashMap instance = hashMap;
+           if (instance == null) {
+               synchronized (this) {
+                   instance = hashMap;
+                   if (instance == null) {
+                       instance = new java.util.concurrent.ConcurrentHashMap();
+                       // filled data
+                       hashMap = instance;
+                   }
+               }
+           }
+           // use the hashMap
+           
+       }
+    }
+    ```
+6. 对象重用。对象在堆中保留的时间越长，GC的效率就会越差。对象池需要Throttling。
+
+###线程与同步的性能
+
+1. 如果任务话费时间是均衡的，使用分段的ThreadPoolExecutor性能更好；而如果任何不是均衡的，则使用ForkJoinPool性能更好。
+2. 伪共享，类似cache miss。严格来说，伪共享未必会设计同步或volatile变量：不论何时，CPU缓存中有任何数据写入了，其他保存了同样范围的的缓存都必须作废。然而Java内存模型要求数据只是在同步原语（包括CAS和volatile）结束时才会写入主内存。
 
 
 ## 深入java虚拟机
 
 ### java 虚拟机是什么
-1.抽象规范
-2.一个具体的实现
-3.一个运行中的虚拟机实例
+
+1. 抽象规范
+2. 一个具体的实现
+3. 一个运行中的虚拟机实例
 
 
 ### java虚拟机的组成：
