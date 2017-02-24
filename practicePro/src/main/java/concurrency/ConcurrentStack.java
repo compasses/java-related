@@ -17,6 +17,32 @@ import java.util.concurrent.atomic.*;
 public class ConcurrentStack <E> {
     AtomicReference<Node<E>> top = new AtomicReference<Node<E>>();
 
+    public void push2(E item) {
+        Node<E> newHead = new Node<E>(item);
+        Node<E> oldHead;
+
+        do {
+            oldHead = top.get();
+            newHead.next = oldHead;
+        } while (!top.compareAndSet(oldHead, newHead));
+
+    }
+
+    public E pop2() {
+        Node<E> oldHead;
+        Node<E> newHead;
+
+        do {
+            oldHead = top.get();
+            if (oldHead == null) {
+                return null;
+            }
+            newHead = oldHead.next;
+        } while (!top.compareAndSet(oldHead, newHead));
+
+        return oldHead.item;
+    }
+
     public void push(E item) {
         Node<E> newHead = new Node<E>(item);
         Node<E> oldHead;
@@ -45,6 +71,21 @@ public class ConcurrentStack <E> {
         public Node(E item) {
             this.item = item;
         }
+    }
+
+    public static void main(String[] args) {
+        ConcurrentStack<Long> concurrentStack = new ConcurrentStack<Long>();
+
+        concurrentStack.push2(10L);
+        concurrentStack.push2(11L);
+        concurrentStack.push2(12L);
+
+        System.out.println("top " + concurrentStack.pop2());
+        System.out.println("top " + concurrentStack.pop2());
+        System.out.println("top " + concurrentStack.pop2());
+        System.out.println("top " + concurrentStack.pop2());
+
+
     }
 }
 

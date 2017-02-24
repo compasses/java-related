@@ -3,6 +3,9 @@ package concurrency;
 /**
  * Created by i311352 on 8/19/16.
  */
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.*;
 
 /**
@@ -56,6 +59,27 @@ public class ConditionBoundedBuffer <T> {
         } finally {
             lock.unlock();
         }
+    }
+
+    public static void main(String[] args) throws InterruptedException {
+
+        ConditionBoundedBuffer<Long> boundedBuffer = new ConditionBoundedBuffer<>();
+
+        ExecutorService exec = Executors.newCachedThreadPool();
+
+        exec.submit(() -> {
+            try {
+                TimeUnit.SECONDS.sleep(10);
+                boundedBuffer.put(0L);
+            } catch (InterruptedException e) {
+
+            }
+        });
+
+        System.out.println("Got value " + boundedBuffer.take());
+
+
+
     }
 
 }

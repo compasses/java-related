@@ -4,6 +4,7 @@ import com.sun.org.apache.xpath.internal.operations.Bool;
 import org.springframework.boot.test.IntegrationTest;
 
 import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -12,6 +13,124 @@ import java.util.concurrent.Executors;
  * Created by i311352 on 22/02/2017.
  */
 class LRUCache2 {
+    private int capacity;
+    private ConcurrentHashMap<Integer, Node> cache;
+    private Node cacheLinkHead;
+
+    public LRUCache2(int capacity) {
+        this.capacity  = capacity;
+        this.cache = new ConcurrentHashMap<Integer, Node>(capacity);
+    }
+
+    public void set(int key, int val) {
+        Node find = cache.get(key);
+
+        if (find != null) {
+            //if (find != cacheLinkHead) {
+            appendToHead(find, key, val);
+            //}
+        } else {
+            if (isFull()) {
+                Node tailNode = cacheLinkHead.prev;
+                appendToHead(tailNode, key, val);
+            } else {
+                Node node = new Node(key, val);
+                appendToHead(node);
+            }
+        }
+    }
+
+    public int get(int key) {
+        Node find = cache.get(key);
+        if (find != null) {
+            appendToHead(find, key, find.val);
+            return find.val;
+        }
+
+        return -1;
+    }
+    private void appendToHead(Node find, int key, int val) {
+        find.prev.next = find.next;
+        find.next.prev = find.prev;
+        cache.remove(find.key);
+
+        find.val = val;
+        find.key = key;
+
+        find.next = cacheLinkHead;
+        find.prev = cacheLinkHead.prev;
+
+        cacheLinkHead.prev.next = find;
+        cacheLinkHead.prev = find;
+
+        cacheLinkHead = find;
+
+        cache.put(key, find);
+    }
+
+
+    private void appendToHead(Node node) {
+
+        if (cacheLinkHead == null) {
+            cacheLinkHead = node;
+        } else {
+            node.next = cacheLinkHead;
+            node.prev = cacheLinkHead.prev;
+
+            cacheLinkHead.prev.next = node;
+            cacheLinkHead.prev = node;
+
+            cacheLinkHead = node;
+        }
+
+        cache.put(node.key, node);
+    }
+
+    private boolean isFull() {
+        return cache.size() == capacity;
+    }
+
+    public void printFromHead () {
+        Node head = cacheLinkHead;
+        System.out.println("head: " + head.key +":"+ head.val);
+        while (head.next != cacheLinkHead) {
+            head = head.next;
+            System.out.println("->: " + head.key +":"+ head.val);
+        }
+    }
+
+
+
+
+    private static class Node {
+        int key;
+        int val;
+
+        Node next;
+        Node prev;
+        public Node(int key, int val) {
+            this.key = key;
+            this.val = val;
+            this.next = this.prev = this;
+        }
+    }
+
+    public static void main(String[] args) {
+        LRUCache2 cache = new LRUCache2(3);
+        cache.set(1, 1);
+        cache.set(2,2);
+        cache.set(3,3);
+        cache.printFromHead();
+        System.out.println("Get " + cache.get(2));
+        cache.printFromHead();
+
+        cache.set(4, 4);
+        cache.set(5, 5);
+        System.out.println("Get " + cache.get(1));
+        System.out.println("Get " + cache.get(3));
+        cache.printFromHead();
+
+    }
 
 }
 
@@ -40,7 +159,7 @@ public class LRUCache{
         this.cacheLinkHead = null;
         this.cacheLinkTail = null;
 
-        cache = new HashMap<Integer, Node>(100);
+        cache = new HashMap<Integer, Node>(2);
     }
 
     private boolean isFull() {
