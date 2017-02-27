@@ -19,9 +19,12 @@ public class CyclicBarrierDemo {
 
         public void run() {
             try {
-                cyclic.await();
-                doWork();
-                cyclic.await();
+                for (int i = 0 ; i < 2; i++) {
+                    cyclic.await();
+                    doWork();
+                    //cyclic.await();
+                }
+
             } catch (InterruptedException e) {
                 e.printStackTrace();
             } catch (BrokenBarrierException e) {
@@ -50,6 +53,7 @@ public class CyclicBarrierDemo {
         public void run() {
             if (flag) {
                 System.out.println("司令:【士兵】" + N + "个, 任务完成");
+                flag = false;
             } else {
                 System.out.println("司令:【士兵】" + N + "个, 集合完毕");
                 flag = true;

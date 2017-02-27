@@ -4,6 +4,7 @@ import com.sun.org.apache.xpath.internal.operations.Bool;
 import org.springframework.boot.test.IntegrationTest;
 
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
@@ -14,20 +15,24 @@ import java.util.concurrent.Executors;
  */
 class LRUCache2 {
     private int capacity;
-    private ConcurrentHashMap<Integer, Node> cache;
+    private Hashtable<Integer, Node> cache;
     private Node cacheLinkHead;
 
     public LRUCache2(int capacity) {
         this.capacity  = capacity;
-        this.cache = new ConcurrentHashMap<Integer, Node>(capacity);
+        this.cache = new Hashtable<Integer, Node>(capacity);
     }
 
     public void set(int key, int val) {
         Node find = cache.get(key);
 
         if (find != null) {
+            if (find == cacheLinkHead) {
+                cacheLinkHead.val = val;
+            } else {
+                appendToHead(find, key, val);
+            }
             //if (find != cacheLinkHead) {
-            appendToHead(find, key, val);
             //}
         } else {
             if (isFull()) {
@@ -43,7 +48,9 @@ class LRUCache2 {
     public int get(int key) {
         Node find = cache.get(key);
         if (find != null) {
-            appendToHead(find, key, find.val);
+            if (find != cacheLinkHead) {
+                appendToHead(find, key, find.val);
+            }
             return find.val;
         }
 
@@ -116,31 +123,47 @@ class LRUCache2 {
     }
 
     public static void main(String[] args) {
-        LRUCache2 cache = new LRUCache2(3);
-        cache.set(1, 1);
-        cache.set(2,2);
-        cache.set(3,3);
-        cache.printFromHead();
-        System.out.println("Get " + cache.get(2));
-        cache.printFromHead();
+        LRUCache2 cache2 = new LRUCache2(2);
+        cache2.set(2, 1);
+        cache2.set(3, 2);
 
-        cache.set(4, 4);
-        cache.set(5, 5);
-        System.out.println("Get " + cache.get(1));
-        System.out.println("Get " + cache.get(3));
-        cache.printFromHead();
+        System.out.println("Get " + cache2.get(3));
+        cache2.printFromHead();
+        System.out.println("Get " + cache2.get(2));
+        cache2.printFromHead();
+
+        cache2.set(4, 3);
+        cache2.printFromHead();
+
+        System.out.println("Get " + cache2.get(2));
+        System.out.println("Get " + cache2.get(3));
+
+        System.out.println("Get " + cache2.get(4));
+
+
+//        LRUCache2 cache = new LRUCache2(3);
+//        cache.set(1, 1);
+//        cache.set(2,2);
+//        cache.set(3,3);
+//        cache.printFromHead();
+//        System.out.println("Get " + cache.get(2));
+//        cache.printFromHead();
+//
+//        cache.set(4, 4);
+//        cache.set(5, 5);
+//        System.out.println("Get " + cache.get(1));
+//        System.out.println("Get " + cache.get(3));
+//        cache.printFromHead();
 
     }
 
 }
 
-public class LRUCache{
+public class LRUCache {
+
     private int   capacity;
     private int   currentCount;
     private Node  cacheLinkHead;
-    private Node  cacheLinkTail;
-
-    private HashMap<Integer, Node> cache;
 
     class Node {
         int key;
@@ -150,16 +173,13 @@ public class LRUCache{
         public Node(int key, int val) {
             this.key = key;
             this.val = val;
+            this.next = this.prev = this;
         }
     }
 
     public LRUCache(int capacity){
         this.capacity = capacity;
         this.currentCount = 0;
-        this.cacheLinkHead = null;
-        this.cacheLinkTail = null;
-
-        cache = new HashMap<Integer, Node>(2);
     }
 
     private boolean isFull() {
@@ -172,33 +192,32 @@ public class LRUCache{
             return null;
         }
 
-        while (find != null) {
+        do {
             if (find.key == key) {
                 return find;
             }
             find = find.next;
-        }
+        } while(find != cacheLinkHead);
 
         return null;
     }
 
     private void moveToHead(Node node) {
-        Node find = cacheLinkHead;
-        while (find != null) {
-            if (find == node) {
-                if (find != cacheLinkHead) {
-                    int tempKey = cacheLinkHead.key;
-                    int tempVal = cacheLinkHead.val;
-                    cacheLinkHead.key = find.key;
-                    cacheLinkHead.val = find.val;
-                    find.key = tempKey;
-                    find.val = tempVal;
-                }
-                break;
-            }
-
-            find = find.next;
+        if (node == cacheLinkHead) {
+            return ;
         }
+        node.next.prev = node.prev;
+        node.prev.next = node.next;
+        appendToHead(node);
+    }
+
+    private void appendToHead(Node newNode) {
+        newNode.next = cacheLinkHead;
+        newNode.prev = cacheLinkHead.prev;
+
+        cacheLinkHead.prev.next = newNode;
+        cacheLinkHead.prev = newNode;
+        cacheLinkHead = newNode;
     }
 
     private void addNode(Node newNode) {
@@ -206,17 +225,14 @@ public class LRUCache{
         if (cacheLinkHead == null) {
             // the first one
             cacheLinkHead = newNode;
-            cacheLinkTail = newNode;
-
             return;
         }
 
-        newNode.next = cacheLinkHead;
-        cacheLinkHead.prev = newNode;
-        cacheLinkHead = newNode;
+        appendToHead(newNode);
+
     }
 
-    public synchronized void set(int key,int value) {
+    public void put(int key,int value) {
         // first check exist or not
         Node find = loopFind(key);
         if (find != null) {
@@ -226,9 +242,10 @@ public class LRUCache{
         } else {
             if (isFull()) {
                 // swap the oldest one
-                cacheLinkTail.key = key;
-                cacheLinkTail.val = value;
-                moveToHead(cacheLinkTail);
+                Node tailNode = cacheLinkHead.prev;
+                tailNode.key = key;
+                tailNode.val = value;
+                moveToHead(tailNode);
             } else {
                 // add node to the head
                 Node newNode = new Node(key, value);
@@ -236,13 +253,10 @@ public class LRUCache{
             }
         }
 
-        System.out.println("currentCount " + currentCount);
     }
 
-    public synchronized int get(int key) throws ClassNotFoundException{
+    public int get(int key) {
         Node find = loopFind(key);
-        //
-
 
         if (find != null) {
             int found = find.val;
@@ -250,75 +264,13 @@ public class LRUCache{
             return found;
         }
         // throw exception, will define it in somewhere
-        throw new ClassNotFoundException("");
+        return -1;
     }
-
-public static void test() throws ClassNotFoundException{
-    LRUCache cache = new LRUCache(2);
-    cache.set(1, 1);
-    cache.set(2, 2);
-    cache.set(3, 2);
-    //assertEquals cache.get(3) == 21;
-    //assert cache.get(2) == 2;
 }
 
-
-
-//
-
-//  ["LRUCache","put","put","get","put","get","put","get","get","get"]
-//          [[2],[1,1],[2,2],[1],[3,3],[2],[4,4],[1],[3],[4]]
-//
-
-//    ["LRUCache","put","put","get","put","put","get"]
-//            [[2],[2,1],[2,2],[2],[1,1],[4,1],[2]]
-//
-//
-
-public static void main(String[] args) throws ClassNotFoundException{
-    //test();
-    LRUCache cache = new LRUCache(2);
-    cache.set(2, 1);
-    cache.set(2,2);
-    System.out.println("Get " + cache.get(2));
-    cache.set(1, 1);
-    cache.set(4, 1);
-
-    System.out.println("Get " + cache.get(2));
-
-//    ExecutorService service = Executors.newCachedThreadPool();
-//    LRUCache cache = new LRUCache(100);
-//
-//    service.submit(() ->{
-//        for (int i = 0; i < 100; i++) {
-//            cache.set(i, i*10);
-//        }
-//    });
-//
-////    service.submit(() ->{
-////        for (int i = 0; i < 200; i++) {
-////            cache.set(i, i*10);
-////        }
-////    });
-////    for (int i = 0; i < 200; i++) {
-////        cache.set(i, i*10);
-////    }
-////    service.submit(() ->{
-////        for (int i = 0; i < 200; i++) {
-////            cache.set(i, i*10);
-////        }
-////    });
-//
-//    service.submit(() ->{
-//        try {
-//            for (int i = 0; i < 111; ++i) {
-//                System.out.println("val " + cache.get(i));
-//            }
-//        } catch (ClassNotFoundException e){
-//
-//        }
-//
-//    });
-
-}
-}
+/**
+ * Your LRUCache object will be instantiated and called as such:
+ * LRUCache obj = new LRUCache(capacity);
+ * int param_1 = obj.get(key);
+ * obj.put(key,value);
+ */
