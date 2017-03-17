@@ -3,6 +3,7 @@ package jet.mq.republish;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.JsonPrimitive;
 import com.google.gson.reflect.TypeToken;
 import com.rabbitmq.client.*;
 import org.apache.log4j.Logger;
@@ -61,51 +62,68 @@ public class PublishMsg {
     public  void publish() {
         Connection conn = null;
 
-        String sql = "SELECT MESSAGEPROPERTIES, EXCHANGENAME, ROUTINGKEY, MESSAGEBODYBYTES FROM JOBEXECRECORD";
-        try {
-            conn = dataSource.getConnection();
-            PreparedStatement ps = conn.prepareStatement(sql);
-            ResultSet rs = ps.executeQuery();
+        String sqlSKU = "SELECT MESSAGEPROPERTIES, EXCHANGENAME, ROUTINGKEY, MESSAGEBODYBYTES FROM JOBEXECRECORD where ROUTINGKEY like \"SKU.%\"";
+        String sqlProduct = "SELECT MESSAGEPROPERTIES, EXCHANGENAME, ROUTINGKEY, MESSAGEBODYBYTES FROM JOBEXECRECORD where ROUTINGKEY like \"Product.%\"";
+        String sqlAll = "SELECT MESSAGEPROPERTIES, EXCHANGENAME, ROUTINGKEY, MESSAGEBODYBYTES FROM JOBEXECRECORD LIMIT ";
 
-            while (rs.next()) {
-                String properties = rs.getNString(1);
-                String exchangeName = rs.getNString(2);
-                String routingKey = rs.getNString(3);
-                Blob msg = rs.getBlob(4);
 
-                JsonObject object = new JsonParser().parse(properties).getAsJsonObject();
-                JsonObject header = object.get("headers").getAsJsonObject();
+        int start = 0;
+        int round = 0;
+        long step = 1000;
+        do {
+            String sql = sqlAll + round*step + "," + step;
+
+            try {
+                conn = dataSource.getConnection();
+                PreparedStatement ps = conn.prepareStatement(sql);
+                ResultSet rs = ps.executeQuery();
+
+                while (rs.next()) {
+                    String properties = rs.getNString(1);
+                    String exchangeName = rs.getNString(2);
+                    String routingKey = rs.getNString(3);
+                    Blob msg = rs.getBlob(4);
+
+                    JsonObject object = new JsonParser().parse(properties).getAsJsonObject();
+                    JsonObject header = object.get("headers").getAsJsonObject();
 
 //                Gson gson = new Gson();
 //                Type stringObjectMap = new TypeToken<Map<String, String>>(){}.getType();
 //                HashMap<String, String> headers = gson.fromJson(header, stringObjectMap);
-                HashMap<String, Object> headers = new HashMap<>();
-                headers.put("X-Tenant-ID", header.get("X-Tenant-ID").getAsLong());
-                headers.put("X-Message-ID", header.get("X-Message-ID").getAsString());
-                headers.put("X-User-ID", header.get("X-User-ID").getAsLong());
-                headers.put("X-Employee-ID", -1L);
+                    HashMap<String, Object> headers = new HashMap<>();
+                    headers.put("X-Tenant-ID", header.get("X-Tenant-ID").getAsLong());
+                    headers.put("X-Message-ID", header.get("X-Message-ID").getAsString());
+                    headers.put("X-User-ID", header.get("X-User-ID").getAsLong());
+                    headers.put("X-Employee-ID", -1L);
 //                headers.put("X-Session-ID", header.get("X-Session-ID").getAsString());
+//                    byte[] body = msg.getBytes(1, (int) msg.length());
+//                    JsonObject o = new JsonParser().parse(new String(body)).getAsJsonObject();
+//                    long version = o.get("version").getAsLong();
+//                    o.add("version", new JsonPrimitive(version+versionStart));
 
-                launchMsg(headers, exchangeName, routingKey, msg.getBytes(1, (int) msg.length()));
+                    launchMsg(headers, exchangeName, routingKey, msg.getBytes(1, (int) msg.length()));
+
+                }
+                round++;
+
+                rs.close();
+                ps.close();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            } finally {
+                if (conn != null) {
+                    try {
+                        conn.close();
+                    } catch (SQLException e) {}
+                }
             }
-            rs.close();
-            ps.close();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        } finally {
-            if (conn != null) {
-                try {
-                    conn.close();
-                } catch (SQLException e) {}
-            }
-        }
+        } while (start++ < 100);
+
     }
 
     public void launchMsg(Map<String, Object> headers, String exchangeName, String routingKey, byte[] msg) {
         if (routingKey.length() > 0) {
-
             logger.info("RoutingKey: " + routingKey + " msg:" + msg.toString());
-
             try {
                 this.channel.basicPublish(exchangeName, routingKey,
                         new AMQP.BasicProperties.Builder()
@@ -118,9 +136,7 @@ public class PublishMsg {
             }
             return;
         }
-
         logger.info("RoutingKey: " + routingKey + " msg:" + msg.toString());
-
         try {
             this.channel.basicPublish(exchangeName, routingKey,
                     new AMQP.BasicProperties.Builder()

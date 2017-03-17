@@ -164,5 +164,9 @@ public class HashTest {
         System.out.println("Get " + test.get(222));
 
         System.out.println("tale " + test.toString());
+
+        if (("j" + "v" + "m").intern() == "jvm") {
+            System.out.println("OK all right");
+        }
     }
 }

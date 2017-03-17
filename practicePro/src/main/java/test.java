@@ -1,3 +1,5 @@
+import java.util.concurrent.atomic.AtomicInteger;
+
 /**
  * Created by i311352 on 22/02/2017.
  */
@@ -90,6 +92,9 @@ public class test {
         String asc = bin2asc(binary);
         System.out.println("ASC : " + asc);
 
+        AtomicInteger integer = new AtomicInteger();
+        integer.addAndGet(11);
+        System.out.println("OKOK i am here " + integer);
 
 
         int[] testArr = {4, 14, 2};
