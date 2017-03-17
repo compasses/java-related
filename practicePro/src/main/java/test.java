@@ -4,7 +4,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Created by i311352 on 22/02/2017.
  */
 public class test {
-    private static int DEFAULT_LENGTH = 8;
+    private static int DEFAULT_LENGTH = 32;
     public static String asc2bin(String str) {
         StringBuilder binaryString = new StringBuilder(8 * str.length());
         for (int i = 0; i < str.length(); i++) {
@@ -87,7 +87,7 @@ public class test {
 
     }
     public static void main(String[] args) {
-        String binary = asc2bin("Hello world!");
+        String binary = asc2bin("你好");
         System.out.println("binary : " + binary);
         String asc = bin2asc(binary);
         System.out.println("ASC : " + asc);

@@ -55,6 +55,32 @@ public class HashTest {
         return -1;
     }
 
+    public void delete(int key) {
+        int hashCode = hash(key);
+        int ind = indexFor(hashCode, count);
+
+        Node n = table[ind];
+        if (n == null) {
+            return ;
+        }
+
+        Node prev = table[ind];
+        while (n != null) {
+            if (n.key.equals(key)) {
+                if (n == table[ind]) {
+                    table[ind] = n.next;
+                } else {
+                    prev.next = n.next;
+                }
+                size--;
+                break;
+            }
+            prev = n;
+            n = n.next;
+        }
+
+    }
+
     public int indexFor(int h, int length) {
         return h & (length - 1);
     }
@@ -152,17 +178,23 @@ public class HashTest {
     public static void main(String[] args) {
         HashTest test = new HashTest();
         test.put(111, 2);
+        test.put(15, 3);
+        test.put(30, 4);
+
+
         test.put(222, 2);
         test.put(2, 2);
         test.put(3, 2);
         test.put(4, 2);
-        for (int i = 0; i < 100; ++i) {
-            test.put(i, i*10);
-        }
+//        for (int i = 0; i < 100; ++i) {
+//            test.put(i, i*10);
+//        }
+        System.out.println("tale " + test.toString());
 
         System.out.println("Get " + test.get(111));
         System.out.println("Get " + test.get(222));
 
+        test.delete(111);
         System.out.println("tale " + test.toString());
 
         if (("j" + "v" + "m").intern() == "jvm") {
