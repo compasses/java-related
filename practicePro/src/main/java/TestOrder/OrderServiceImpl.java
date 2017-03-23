@@ -1,7 +1,6 @@
 package TestOrder;
 
 import org.apache.catalina.*;
-import sun.jvm.hotspot.utilities.WorkerThread;
 
 import java.util.LinkedList;
 import java.util.concurrent.*;
@@ -14,7 +13,7 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class OrderServiceImpl implements OrderService, Callable<Object> {
     //private ExecutorService executorService = Executors.newSingleThreadExecutor();
-    WorkerThread thread = new WorkerThread();
+//    WorkerThread thread = new WorkerThread();
 
 static class WorkderThread extends Thread {
     private static WorkerQueue queue = new WorkerQueue(10);

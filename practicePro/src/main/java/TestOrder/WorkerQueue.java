@@ -10,7 +10,6 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class WorkerQueue {
     private int capacity;
-    private int queueSize;
     private LinkedList<Object> queue = new LinkedList<>();
     private ReentrantLock lock = new ReentrantLock();
     private Condition fullCondition = lock.newCondition();
@@ -18,31 +17,36 @@ public class WorkerQueue {
 
     public WorkerQueue(int capacity) {
         this.capacity = capacity;
-        this.queueSize = 0;
     }
 
     public void putReq(Object o) {
+        lock.lock();
         try {
-            while (this.queueSize >= this.capacity) {
+            while (this.queue.size() >= this.capacity) {
                 fullCondition.await();
             }
             this.queue.add(o);
-            nullCondition.notify();
+            nullCondition.signal();
         } catch (InterruptedException e) {
             e.printStackTrace();
+        } finally {
+            lock.unlock();
         }
     }
 
     public Object getReq() {
         Object o = null;
+        lock.lock();
         try {
-            while (this.queueSize == 0) {
+            while (this.queue.size() == 0) {
                 nullCondition.await();
             }
             o  = this.queue.poll();
-            fullCondition.notify();
+            fullCondition.signal();
         } catch (InterruptedException e) {
             e.printStackTrace();
+        } finally {
+            lock.unlock();
         }
         return o;
     }

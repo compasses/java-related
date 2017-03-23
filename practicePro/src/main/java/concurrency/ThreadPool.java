@@ -17,6 +17,8 @@ public class ThreadPool {
         ExecutorService execFix = Executors.newFixedThreadPool(10);
         ArrayList<Future<String>> futures = new ArrayList<Future<String>>();
 
+        ExecutorService fork = Executors.newWorkStealingPool();
+
         for (int j = 0; j < 10; j++) {
             futures.add(execFix.submit(new CallableRun(j)));
         }
