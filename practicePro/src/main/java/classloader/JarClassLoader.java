@@ -29,6 +29,7 @@ public class JarClassLoader extends ClassLoader {
         if (result != null) {
             return result;
         }
+
         try {
             findSystemClass(className);
         } catch (Exception e) {
