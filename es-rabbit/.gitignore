@@ -1,0 +1,8 @@
+*.iml
+*/**.iml
+/**/build/*
+/**/gradle/*
+/**/.gradle/*
+/**/gradle*
+/*/.gradle/*
+.gradle/*

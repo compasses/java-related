@@ -10,14 +10,12 @@ import elasticsearch.esapi.resp.*;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.entity.StringEntity;
+import org.apache.log4j.Logger;
 import org.elasticsearch.client.Response;
 import org.elasticsearch.client.RestClient;
-import org.apache.log4j.Logger;
 import org.springframework.stereotype.Service;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 
 /**
@@ -27,6 +25,7 @@ import java.util.*;
 @Service
 public class LoadData {
     private static final Logger logger = Logger.getLogger(LoadData.class);
+
     private RestClient client = null;//new ElasticRestClient().createInstance();
     private final Gson gson = new Gson();
 
@@ -35,6 +34,7 @@ public class LoadData {
     // aggregate fields
 
     public void saveData(String fileName, Long tenantId, String s3buket, String EShosts) throws Exception {
+
         ElasticRestClient sclient = new ElasticRestClient();
         sclient.setHosts(Arrays.asList(EShosts));
 
@@ -71,7 +71,6 @@ public class LoadData {
 
     public void exec(Long tenantId, String file) {
         logger.info("Start to export data");
-        Integer round = 0;
         Long totalCount = 0L;
 
         HashMap<String, String> param = new HashMap<>();
@@ -89,32 +88,37 @@ public class LoadData {
         JsonObject scollSource = new JsonObject();
         scollSource.addProperty("scroll", "10m");
         scollSource.addProperty("scroll_id", scrollId);
-        BufferedWriter out = null;
+        //BufferedWriter out = null;
+        OutputStream out = null;
         try {
-            out = new BufferedWriter(new FileWriter(file), 20480);
+//            OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(file));
+//            out = new BufferedWriter(writer,20480);
+            out = new FileOutputStream(file);
+
+            do {
+                if (response == null || response.getHit().getHits().size() == 0) {
+                    logger.warn("Failed to get response, do nothing");
+                    break;
+                }
+
+                // do update
+                totalCount += doSaveData(out, response);
+                // check finish or not
+                if (response.getHit().getHits().size() < STEP_SIZE) {
+                    break;
+                }
+
+                // start new round update
+                response = searchScroll(new HashMap<>(), scollSource.toString());
+            } while (true);
+            if (out != null) out.flush();
         } catch (IOException e) {
             logger.error("Open file failed " + e);
+        } finally {
+
         }
 
-        do {
-            if (response == null || response.getHit().getHits().size() == 0) {
-                logger.warn("Failed to get response, do nothing");
-                break;
-            }
-
-            // do update
-            totalCount += doSaveData(out, response);
-            // check finish or not
-            if (response.getHit().getHits().size() < STEP_SIZE) {
-                break;
-            }
-
-            // start new round update
-            round ++;
-            response = searchScroll(new HashMap<>(), scollSource.toString());
-        } while (true);
-
-        logger.info("Upgrade finish, use round total = " + round.toString() + " data exported = " + totalCount);
+        logger.info("data exported count = " + totalCount +" ");
         // need flush
         flush();
 //        postCheckUpdate(totalCount);
@@ -158,7 +162,7 @@ public class LoadData {
     }
 
 
-    public Integer doSaveData(BufferedWriter out, ESQueryResponse response) {
+    public Integer doSaveData(OutputStream out, ESQueryResponse response) {
         // use bulk API
         List<Hits> hits = response.getHit().getHits();
         JsonArray updateActionArray = new JsonArray();
@@ -168,7 +172,6 @@ public class LoadData {
             Hits hit = hits.get(i);
             Long tenantId = Long.parseLong(hit.getRouting());
             Long sourceId = hit.getSource().get("id").getAsLong();
-
             // action meta data
             JsonObject actionMeta = new JsonObject();
             JsonObject actionInnerObj = new JsonObject();
@@ -199,7 +202,7 @@ public class LoadData {
         }
 
         try {
-            out.write(body.toString());
+            out.write(body.toString().getBytes());
         } catch (IOException e) {
             logger.error("write failed need check again..." + e);
         }

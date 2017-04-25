@@ -23,6 +23,7 @@ apply plugin: 'maven'
 apply plugin: 'org.springframework.boot'
 //mainClassName = 'event.RabbitMQApp'
 mainClassName = 'exportimport.MainCtrl'
+applicationDefaultJvmArgs = ["-Dconfig=./config.properties"]
 
 //jar {
 //    baseName = 'elastic-rabbit-job'
@@ -52,7 +53,7 @@ dependencies {
     compile 'joda-time:joda-time:2.2'
     compile 'com.rabbitmq:amqp-client:3.6.5'
     compile 'commons-io:commons-io:2.4'
-    compile 'com.sap.sme.anw:vault-common-java:1.0.0'
+//    compile 'com.sap.sme.anw:vault-common-java:1.0.0'
     compile group: 'org.mariadb.jdbc', name: 'mariadb-java-client', version: '1.5.5'
     compile 'com.google.code.gson:gson:2.7'
     compile 'commons-io:commons-io:2.4'
@@ -68,6 +69,6 @@ dependencies {
     // TestNG is also supported by the Gradle Test task. Just change the
     // testCompile dependency to testCompile 'org.testng:testng:6.8.1' and add
     // 'test.useTestNG()' to your build script.
-    testCompile 'junit:junit:4.12'
-    testCompile('org.springframework.boot:spring-boot-starter-test')
+//    testCompile 'junit:junit:4.12'
+//    testCompile('org.springframework.boot:spring-boot-starter-test')
 }
