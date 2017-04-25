@@ -42,6 +42,47 @@ public class LoadData {
         exec(tenantId, fileName);
     }
 
+    public void PutData( String EShosts, String file) throws Exception {
+        ElasticRestClient sclient = new ElasticRestClient();
+        sclient.setHosts(Arrays.asList(EShosts));
+        client = sclient.createInstance();
+        BufferedReader br = null;
+        FileReader fr = null;
+
+        try {
+            fr = new FileReader(file);
+            br = new BufferedReader(fr);
+
+            String sCurrentLine;
+
+            br = new BufferedReader(new FileReader(file));
+
+            StringBuilder builder = new StringBuilder(20240);
+
+            int line = 0;
+            while ((sCurrentLine = br.readLine()) != null) {
+                builder.append(sCurrentLine);
+                builder.append("\r\n");
+                line++;
+                if (line == 2000) {
+                    doBulkRequest(builder.toString());
+                    builder = new StringBuilder(20240);
+                    line = 0;
+                }
+            }
+
+            if (line != 0) {
+                logger.info("left ." + line);
+                doBulkRequest(builder.toString());
+            }
+
+
+        } catch (Exception e) {
+            logger.error("error " + e);
+        }
+
+    }
+
     /**
      * {
      "size": 100,
@@ -279,7 +320,7 @@ public class LoadData {
             HttpEntity requestBody = new StringEntity(body);
             Response response = client.performRequest(
                     "POST",
-                    ESConstants.STORE_INDEX + "/" + ESConstants.PRODUCT_TYPE + "/_bulk",
+                    ESConstants.STORE_INDEX + "/_bulk",
                     new HashMap<String, String>(),
                     requestBody);
 

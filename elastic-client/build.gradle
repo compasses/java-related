@@ -12,7 +12,7 @@ apply plugin: 'application'
 apply plugin: 'idea'
 
 mainClassName = 'exportimport.MainCtrl'
-applicationDefaultJvmArgs = ["-Dconfig=./config.properties"]
+applicationDefaultJvmArgs = ["-Dconfig=./config.properties","-Dexport=true"]
 
 repositories {
     mavenCentral()

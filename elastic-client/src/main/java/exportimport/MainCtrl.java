@@ -33,9 +33,9 @@ public class MainCtrl {
 //
 //            LoadData loadData = new LoadData();
 //            logger.info("going to save data....");
-//            loadData.saveData(fileName, tenantId, buket, eshost);
-
-            if (System.getProperty("config") != null) {
+//            //loadData.saveData(fileName, tenantId, buket, eshost);
+           // loadData.testPutData(eshost);
+            if (System.getProperty("config") != null && System.getProperty("export") == "true") {
                 logger.info("Use user config " + System.getProperty("config"));
                 try {
                     File file = new File(System.getProperty("config"));
@@ -44,7 +44,7 @@ public class MainCtrl {
                         Properties props = new Properties();
                         props.load(inputStream);
 
-                        String fileName = props.getProperty("SAVE_FILE");
+                        String fileName = props.getProperty("FILE");
                         String eshost = props.getProperty("ES_HOST");
                         String buket = props.getProperty("S3_BUKET");
                         Long tenantId = Long.parseLong(props.getProperty("TENANTID"));
@@ -60,7 +60,20 @@ public class MainCtrl {
                 } catch (IOException e) {
                     logger.error("file load fail "+e);
                 }
-            } else {
+            } else if (System.getProperty("config") != null && System.getProperty("export") == "false"){
+                File file = new File(System.getProperty("config"));
+                if (!file.exists()) {
+                    logger.error("file not exist.." + file);
+                }
+
+                FileInputStream inputStream = new FileInputStream(file);
+                Properties props = new Properties();
+                props.load(inputStream);
+
+                String fileName = props.getProperty("FILE");
+                String eshost = props.getProperty("ES_HOST");
+                LoadData loadData = new LoadData();
+                loadData.PutData(eshost, fileName);
                 logger.error("cannot get properties " + System.getProperty("config"));
             }
 
