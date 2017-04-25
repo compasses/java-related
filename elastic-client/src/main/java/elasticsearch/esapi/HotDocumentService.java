@@ -14,8 +14,8 @@ import org.apache.http.HttpEntity;
 import org.apache.http.entity.StringEntity;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.actuate.metrics.CounterService;
-import org.springframework.boot.actuate.metrics.GaugeService;
+//import org.springframework.boot.actuate.metrics.CounterService;
+//import org.springframework.boot.actuate.metrics.GaugeService;
 import org.springframework.stereotype.Component;
 
 import java.nio.charset.Charset;
@@ -35,11 +35,11 @@ public class HotDocumentService {
     @Autowired
     private DocumentService documentService;
 
-    @Autowired
-    private CounterService counterService;
-
-    @Autowired
-    private GaugeService gaugeService;
+//    @Autowired
+//    private CounterService counterService;
+//
+//    @Autowired
+//    private GaugeService gaugeService;
 
     /**
      * @param index
@@ -109,14 +109,14 @@ public class HotDocumentService {
                 stopWatch.stop();
                 String metricName = this.getClass().getSimpleName() + "." + type + "." + sourceId;
 
-                if (successful.equals(Status.SUCCESS)) {
-                    counterService.increment(metricName + "." + ".success");
-                } else if (successful.equals(Status.CONFILICT)) {
-                    counterService.increment(metricName + "." + ".conflict");
-                } else {
-                    counterService.increment(metricName + "." + ".fail");
-                }
-                gaugeService.submit(metricName, stopWatch.getTime());
+//                if (successful.equals(Status.SUCCESS)) {
+//                    counterService.increment(metricName + "." + ".success");
+//                } else if (successful.equals(Status.CONFILICT)) {
+//                    counterService.increment(metricName + "." + ".conflict");
+//                } else {
+//                    counterService.increment(metricName + "." + ".fail");
+//                }
+//                gaugeService.submit(metricName, stopWatch.getTime());
                 logger.info("HotDocumentService sync end on " + newObj.toString() + ", execTime[" + stopWatch.getTime()+ "]");
             }
         }

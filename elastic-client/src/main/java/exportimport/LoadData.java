@@ -60,23 +60,30 @@ public class LoadData {
             StringBuilder builder = new StringBuilder(20240);
 
             int line = 0;
+            int totalCount = 0;
             while ((sCurrentLine = br.readLine()) != null) {
                 builder.append(sCurrentLine);
                 builder.append("\r\n");
                 line++;
                 if (line == 2000) {
-                    doBulkRequest(builder.toString());
+                    ESBulkResponse response = doBulkRequest(builder.toString());
+                    if (response.getErrors()) {
+                        logger.warn("errors happen..need recheck it" );
+                    }
                     builder = new StringBuilder(20240);
                     line = 0;
+                    totalCount += 2000;
                 }
+
             }
 
             if (line != 0) {
                 logger.info("left ." + line);
                 doBulkRequest(builder.toString());
+                totalCount += line;
             }
 
-
+            logger.info("total send " + totalCount);
         } catch (Exception e) {
             logger.error("error " + e);
         }

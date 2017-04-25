@@ -1,5 +1,6 @@
 package exportimport;
 
+
 import org.apache.log4j.Logger;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -11,6 +12,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Properties;
+
 
 /**
  * Created by I311352 on 4/24/2017.
@@ -35,7 +37,7 @@ public class MainCtrl {
 //            logger.info("going to save data....");
 //            //loadData.saveData(fileName, tenantId, buket, eshost);
            // loadData.testPutData(eshost);
-            if (System.getProperty("config") != null && System.getProperty("export") == "true") {
+            if (System.getProperty("config") != null && Boolean.parseBoolean(System.getProperty("export")) == true) {
                 logger.info("Use user config " + System.getProperty("config"));
                 try {
                     File file = new File(System.getProperty("config"));
@@ -60,7 +62,7 @@ public class MainCtrl {
                 } catch (IOException e) {
                     logger.error("file load fail "+e);
                 }
-            } else if (System.getProperty("config") != null && System.getProperty("export") == "false"){
+            } else if (System.getProperty("config") != null && Boolean.parseBoolean(System.getProperty("export")) == false){
                 File file = new File(System.getProperty("config"));
                 if (!file.exists()) {
                     logger.error("file not exist.." + file);
@@ -74,7 +76,8 @@ public class MainCtrl {
                 String eshost = props.getProperty("ES_HOST");
                 LoadData loadData = new LoadData();
                 loadData.PutData(eshost, fileName);
-                logger.error("cannot get properties " + System.getProperty("config"));
+            } else {
+                logger.error("cannot get properties " + System.getProperty("config") + System.getProperty("export"));
             }
 
             System.exit(0);
