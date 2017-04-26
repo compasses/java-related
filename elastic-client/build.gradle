@@ -45,7 +45,6 @@ dependencies {
     compile (group: 'org.springframework.boot', name: 'spring-boot-autoconfigure', version: '1.4.3.RELEASE') {
         exclude group: "commons-logging", module: "commons-logging"
     }
-
     compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.6.2'
     compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.6.2'
     //compile group: 'org.springframework.boot', name: 'spring-boot', version: '1.4.3.RELEASE'

@@ -1,7 +1,6 @@
 package exportimport;
-
-
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -19,7 +18,7 @@ import java.util.Properties;
  */
 @SpringBootApplication
 public class MainCtrl {
-    private static final Logger logger = Logger.getLogger(MainCtrl.class);
+    private static final Logger logger = LogManager.getLogger(MainCtrl.class);
 
     public static void main(String args[]) {
         SpringApplication.run(MainCtrl.class, args);
@@ -35,8 +34,9 @@ public class MainCtrl {
 //
 //            LoadData loadData = new LoadData();
 //            logger.info("going to save data....");
-//            //loadData.saveData(fileName, tenantId, buket, eshost);
+//            loadData.saveData(fileName, tenantId, buket, eshost);
            // loadData.testPutData(eshost);
+            
             if (System.getProperty("config") != null && Boolean.parseBoolean(System.getProperty("export")) == true) {
                 logger.info("Use user config " + System.getProperty("config"));
                 try {

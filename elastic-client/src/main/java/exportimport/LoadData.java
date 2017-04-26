@@ -9,13 +9,19 @@ import elasticsearch.constant.ESConstants;
 import elasticsearch.esapi.resp.*;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
+import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
-import org.apache.log4j.Logger;
+import org.apache.http.message.BasicHeader;
 import org.elasticsearch.client.Response;
 import org.elasticsearch.client.RestClient;
 import org.springframework.stereotype.Service;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 
 /**
@@ -24,7 +30,7 @@ import java.util.*;
 
 @Service
 public class LoadData {
-    private static final Logger logger = Logger.getLogger(LoadData.class);
+    private static final Logger logger = LogManager.getLogger(LoadData.class);
 
     private RestClient client = null;//new ElasticRestClient().createInstance();
     private final Gson gson = new Gson();
@@ -46,47 +52,55 @@ public class LoadData {
         ElasticRestClient sclient = new ElasticRestClient();
         sclient.setHosts(Arrays.asList(EShosts));
         client = sclient.createInstance();
-        BufferedReader br = null;
-        FileReader fr = null;
+        Path path = Paths.get(file);
+        byte[] result =  Files.readAllBytes(path);
 
-        try {
-            fr = new FileReader(file);
-            br = new BufferedReader(fr);
+        logger.info("Read total length is " + result.length);
+        doBulkRequestBytes(result);
+//        BufferedReader br = null;
+//        FileReader fr = null;
 
-            String sCurrentLine;
 
-            br = new BufferedReader(new FileReader(file));
 
-            StringBuilder builder = new StringBuilder(20240);
-
-            int line = 0;
-            int totalCount = 0;
-            while ((sCurrentLine = br.readLine()) != null) {
-                builder.append(sCurrentLine);
-                builder.append("\r\n");
-                line++;
-                if (line == 2000) {
-                    ESBulkResponse response = doBulkRequest(builder.toString());
-                    if (response.getErrors()) {
-                        logger.warn("errors happen..need recheck it" );
-                    }
-                    builder = new StringBuilder(20240);
-                    line = 0;
-                    totalCount += 2000;
-                }
-
-            }
-
-            if (line != 0) {
-                logger.info("left ." + line);
-                doBulkRequest(builder.toString());
-                totalCount += line;
-            }
-
-            logger.info("total send " + totalCount);
-        } catch (Exception e) {
-            logger.error("error " + e);
-        }
+//        try {
+////            fr = new FileReader(file);
+////            br = new BufferedReader(fr);
+////
+////
+////            br = new BufferedReader(new FileReader(file));
+//
+//            StringBuilder builder = new StringBuilder(20240);
+//            FileInputStream fstream = new FileInputStream(file);
+//            BufferedReader bstream = new BufferedReader(new InputStreamReader(fstream));
+//
+//            int line = 0;
+//            int totalCount = 0;
+//            String sCurrentLine;
+//            while ((sCurrentLine = bstream.readLine()) != null) {
+//                builder.append(sCurrentLine);
+//                builder.append("\r\n");
+//                line++;
+//                if (line == 400) {
+//                    ESBulkResponse response = doBulkRequest(builder.toString());
+//                    if (response != null && response.getErrors()) {
+//                        logger.warn("errors happen..need recheck it" );
+//                    }
+//                    builder = new StringBuilder(20240);
+//                    line = 0;
+//                    totalCount += 400;
+//                }
+//            }
+//
+//            if (line != 0) {
+//                logger.info("left ." + line);
+//                doBulkRequest(builder.toString());
+//                totalCount += line;
+//            }
+//
+//            logger.info("total send " + totalCount);
+//        } catch (Exception e) {
+//            logger.error("error " + e);
+//        }
 
     }
 
@@ -220,6 +234,10 @@ public class LoadData {
             Hits hit = hits.get(i);
             Long tenantId = Long.parseLong(hit.getRouting());
             Long sourceId = hit.getSource().get("id").getAsLong();
+            if (sourceId == 137288013316096L) {
+                logger.info("body " + hit.getSource());
+            }
+
             // action meta data
             JsonObject actionMeta = new JsonObject();
             JsonObject actionInnerObj = new JsonObject();
@@ -227,16 +245,18 @@ public class LoadData {
             actionInnerObj.addProperty("routing", tenantId);
             actionInnerObj.addProperty("_type", hit.getType());
             actionInnerObj.addProperty("_index", hit.getIndex());
-            actionInnerObj.addProperty("_retry_on_conflict",3);
+            //actionInnerObj.addProperty("_retry_on_conflict",3);
 
-            actionMeta.add("update", actionInnerObj);
+            //actionMeta.add("update", actionInnerObj);
+            actionMeta.add("index", actionInnerObj);
             updateActionArray.add(actionMeta);
 
             // doc source
-            JsonObject sourceObj = new JsonObject();
-            sourceObj.add("doc", hit.getSource());
-            sourceObj.addProperty("doc_as_upsert", true);
-            updateDocArray.add(sourceObj);
+//            JsonObject sourceObj = new JsonObject();
+//            sourceObj.add("doc", hit.getSource());
+//            sourceObj.addProperty("doc_as_upsert", true);
+//            updateDocArray.add(sourceObj);
+            updateDocArray.add(hit.getSource());
         }
 
         assert updateActionArray.size() == updateDocArray.size();
@@ -321,10 +341,10 @@ public class LoadData {
 
         return hits.size();
     }
-
-    public ESBulkResponse doBulkRequest(String body) {
+    public ESBulkResponse doBulkRequestBytes(byte[] body) {
         try {
-            HttpEntity requestBody = new StringEntity(body);
+            HttpEntity requestBody = new StringEntity(new String(body), ContentType.APPLICATION_JSON);
+            //BasicHeader header = new BasicHeader("Content-Type","application/json;charset=utf-8");
             Response response = client.performRequest(
                     "POST",
                     ESConstants.STORE_INDEX + "/_bulk",
@@ -336,6 +356,30 @@ public class LoadData {
             return esResponse;
         } catch (IOException e) {
             logger.error("Error bulk request " + e);
+            logger.error("body is " + body);
+        }
+
+        return null;
+    }
+
+    public ESBulkResponse doBulkRequest(String body) {
+        try {
+            HttpEntity requestBody = new StringEntity(body);
+
+            BasicHeader header = new BasicHeader("Content-Type","application/json;charset=utf-8");
+            Response response = client.performRequest(
+                    "POST",
+                    ESConstants.STORE_INDEX + "/_bulk",
+                    new HashMap<String, String>(),
+                    requestBody,
+                    header);
+
+            ESBulkResponse esResponse = gson.fromJson(IOUtils.toString(response.getEntity().getContent()),
+                    ESBulkResponse.class);
+            return esResponse;
+        } catch (IOException e) {
+            logger.error("Error bulk request " + e);
+            logger.error("body is " + body);
         }
 
         return null;
