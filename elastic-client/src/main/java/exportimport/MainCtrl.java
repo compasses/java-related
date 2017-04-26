@@ -28,15 +28,15 @@ public class MainCtrl {
     public CommandLineRunner commandLineRunner(ApplicationContext ctx) {
         return args -> {
 //            String fileName = "export.json";
-//            String eshost = "127.0.0.1:9200";
+//            String eshost = "10.128.161.107:9200";
 //            String buket = "s3_buket";
 //            Long tenantId = -1L;//35401674516640L;
 //
 //            LoadData loadData = new LoadData();
 //            logger.info("going to save data....");
-//            loadData.saveData(fileName, tenantId, buket, eshost);
-           // loadData.testPutData(eshost);
-            
+//            //loadData.saveData(fileName, tenantId, buket, eshost);
+//           loadData.PutData(eshost, fileName);
+
             if (System.getProperty("config") != null && Boolean.parseBoolean(System.getProperty("export")) == true) {
                 logger.info("Use user config " + System.getProperty("config"));
                 try {

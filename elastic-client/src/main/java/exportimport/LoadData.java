@@ -36,7 +36,7 @@ public class LoadData {
     private final Gson gson = new Gson();
 
     //bulk operation
-    private final Integer STEP_SIZE = 500;
+    private final Integer STEP_SIZE = 400;
     // aggregate fields
 
     public void saveData(String fileName, Long tenantId, String s3buket, String EShosts) throws Exception {
@@ -52,55 +52,55 @@ public class LoadData {
         ElasticRestClient sclient = new ElasticRestClient();
         sclient.setHosts(Arrays.asList(EShosts));
         client = sclient.createInstance();
-        Path path = Paths.get(file);
-        byte[] result =  Files.readAllBytes(path);
-
-        logger.info("Read total length is " + result.length);
-        doBulkRequestBytes(result);
+//        Path path = Paths.get(file);
+//        byte[] result =  Files.readAllBytes(path);
+//
+//        logger.info("Read total length is " + result.length);
+//        doBulkRequestBytes(result);
 //        BufferedReader br = null;
 //        FileReader fr = null;
 
 
 
-//        try {
-////            fr = new FileReader(file);
-////            br = new BufferedReader(fr);
-////
-////
-////            br = new BufferedReader(new FileReader(file));
+        try {
+//            fr = new FileReader(file);
+//            br = new BufferedReader(fr);
 //
-//            StringBuilder builder = new StringBuilder(20240);
-//            FileInputStream fstream = new FileInputStream(file);
-//            BufferedReader bstream = new BufferedReader(new InputStreamReader(fstream));
 //
-//            int line = 0;
-//            int totalCount = 0;
-//            String sCurrentLine;
-//            while ((sCurrentLine = bstream.readLine()) != null) {
-//                builder.append(sCurrentLine);
-//                builder.append("\r\n");
-//                line++;
-//                if (line == 400) {
-//                    ESBulkResponse response = doBulkRequest(builder.toString());
-//                    if (response != null && response.getErrors()) {
-//                        logger.warn("errors happen..need recheck it" );
-//                    }
-//                    builder = new StringBuilder(20240);
-//                    line = 0;
-//                    totalCount += 400;
-//                }
-//            }
-//
-//            if (line != 0) {
-//                logger.info("left ." + line);
-//                doBulkRequest(builder.toString());
-//                totalCount += line;
-//            }
-//
-//            logger.info("total send " + totalCount);
-//        } catch (Exception e) {
-//            logger.error("error " + e);
-//        }
+//            br = new BufferedReader(new FileReader(file));
+
+            StringBuilder builder = new StringBuilder(20240);
+            FileInputStream fstream = new FileInputStream(file);
+            BufferedReader bstream = new BufferedReader(new InputStreamReader(fstream));
+
+            int line = 0;
+            int totalCount = 0;
+            String sCurrentLine;
+            while ((sCurrentLine = bstream.readLine()) != null) {
+                builder.append(sCurrentLine);
+                builder.append("\r\n");
+                line++;
+                if (line == STEP_SIZE) {
+                    ESBulkResponse response = doBulkRequest(builder.toString());
+                    if (response != null && response.getErrors()) {
+                        logger.warn("errors happen..need recheck it:" + response.getItems().toString() );
+                    }
+                    builder = new StringBuilder(20240);
+                    line = 0;
+                    totalCount += STEP_SIZE;
+                }
+            }
+
+            if (line != 0) {
+                logger.info("left ." + line);
+                doBulkRequest(builder.toString());
+                totalCount += line;
+            }
+
+            logger.info("total send " + totalCount/2);
+        } catch (Exception e) {
+            logger.error("error " + e);
+        }
 
     }
 
@@ -173,7 +173,7 @@ public class LoadData {
                 // start new round update
                 response = searchScroll(new HashMap<>(), scollSource.toString());
             } while (true);
-            if (out != null) out.flush();
+            if (out != null) {out.flush();out.close();};
         } catch (IOException e) {
             logger.error("Open file failed " + e);
         } finally {
@@ -234,9 +234,6 @@ public class LoadData {
             Hits hit = hits.get(i);
             Long tenantId = Long.parseLong(hit.getRouting());
             Long sourceId = hit.getSource().get("id").getAsLong();
-            if (sourceId == 137288013316096L) {
-                logger.info("body " + hit.getSource());
-            }
 
             // action meta data
             JsonObject actionMeta = new JsonObject();
@@ -364,15 +361,13 @@ public class LoadData {
 
     public ESBulkResponse doBulkRequest(String body) {
         try {
-            HttpEntity requestBody = new StringEntity(body);
-
-            BasicHeader header = new BasicHeader("Content-Type","application/json;charset=utf-8");
+            HttpEntity requestBody = new StringEntity(body, ContentType.APPLICATION_JSON);
+            //BasicHeader header = new BasicHeader("Content-Type","application/json;charset=utf-8");
             Response response = client.performRequest(
                     "POST",
                     ESConstants.STORE_INDEX + "/_bulk",
                     new HashMap<String, String>(),
-                    requestBody,
-                    header);
+                    requestBody);
 
             ESBulkResponse esResponse = gson.fromJson(IOUtils.toString(response.getEntity().getContent()),
                     ESBulkResponse.class);
