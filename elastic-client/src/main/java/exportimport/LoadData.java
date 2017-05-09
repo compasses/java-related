@@ -365,7 +365,7 @@ public class LoadData {
             //BasicHeader header = new BasicHeader("Content-Type","application/json;charset=utf-8");
             Response response = client.performRequest(
                     "POST",
-                    ESConstants.STORE_INDEX + "/_bulk",
+                    "/_bulk",
                     new HashMap<String, String>(),
                     requestBody);
 
@@ -442,7 +442,7 @@ public class LoadData {
             HttpEntity entity = new StringEntity(body);
             Response response = client.performRequest(
                     "GET",
-                    ESConstants.STORE_INDEX  + "/_search",
+                    "/_search",
                     params,
                     entity);
 
