@@ -16,6 +16,8 @@ public class ESBaseResponse {
     protected Long version;
     @SerializedName("_routing")
     protected String routing;
+    @SerializedName("_parent")
+    protected String parent;
 
     public String getIndex() {
         return index;
@@ -55,6 +57,14 @@ public class ESBaseResponse {
 
     public void setRouting(String routing) {
         this.routing = routing;
+    }
+
+    public String getParent() {
+        return parent;
+    }
+
+    public void setParent(String parent) {
+        this.parent = parent;
     }
 
     @Override

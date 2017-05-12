@@ -242,6 +242,10 @@ public class LoadData {
             actionInnerObj.addProperty("routing", tenantId);
             actionInnerObj.addProperty("_type", hit.getType());
             actionInnerObj.addProperty("_index", hit.getIndex());
+            if (hit.getType().equals("sku")) {
+                actionInnerObj.addProperty("_parent", hit.getParent());
+            }
+
             //actionInnerObj.addProperty("_retry_on_conflict",3);
 
             //actionMeta.add("update", actionInnerObj);
