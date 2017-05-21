@@ -13,6 +13,7 @@ import java.util.concurrent.Executors;
 /**
  * Created by i311352 on 22/02/2017.
  */
+
 class LRUCache2 {
     private int capacity;
     private Hashtable<Integer, Node> cache;
