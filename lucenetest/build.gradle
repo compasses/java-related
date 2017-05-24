@@ -1,0 +1,24 @@
+apply plugin: 'java'
+apply plugin: 'maven'
+
+group = 'com.jethe'
+version = '0.0.1-SNAPSHOT'
+
+description = """Hello Lucene"""
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+repositories {
+        
+     maven { url "http://cnpvgvb1od091.pvgl.sap.corp:8081/nexus/content/groups/allrepository" }
+     maven { url "http://repo.maven.apache.org/maven2" }
+}
+
+dependencies {
+    compile group: 'org.apache.lucene', name: 'lucene-core', version:'6.3.0'
+    compile group: 'org.apache.lucene', name: 'lucene-queries', version:'6.3.0'
+    compile group: 'org.apache.lucene', name: 'lucene-test-framework', version:'6.3.0'
+    compile group: 'org.apache.lucene', name: 'lucene-analyzers-common', version:'6.3.0'
+    compile group: 'org.apache.lucene', name: 'lucene-queryparser', version:'6.3.0'
+}
