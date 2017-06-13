@@ -48,14 +48,13 @@ public class MainCtrl {
 
                         String fileName = props.getProperty("FILE");
                         String eshost = props.getProperty("ES_HOST");
-                        String buket = props.getProperty("S3_BUKET");
+                        //String buket = props.getProperty("S3_BUKET");
                         Long tenantId = Long.parseLong(props.getProperty("TENANTID"));
 
-                        logger.info("going to export data fileName=" + fileName +" ESHOST="+eshost + " buket="+buket
-                        +" tenantId=" +tenantId);
+                        logger.info("going to export data fileName=" + fileName +" ESHOST="+eshost +" tenantId=" +tenantId);
 
                         LoadData loadData = new LoadData();
-                        loadData.saveData(fileName, tenantId, buket, eshost);
+                        loadData.saveData(fileName, tenantId, eshost);
                     } else {
                         logger.info("cannot find file " + System.getProperty("config"));
                     }

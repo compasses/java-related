@@ -24,6 +24,12 @@ applicationDistribution.from("src/main/resources/") {
     include "config.properties"
 }
 
+applicationDistribution.from("src/") {
+    into "bin"
+    include "README.md"
+}
+
+
 compileJava.options.encoding = 'UTF-8'
 // In this section you declare the dependencies for your production and test code
 //configurations.all {

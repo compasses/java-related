@@ -39,7 +39,7 @@ public class LoadData {
     private final Integer STEP_SIZE = 400;
     // aggregate fields
 
-    public void saveData(String fileName, Long tenantId, String s3buket, String EShosts) throws Exception {
+    public void saveData(String fileName, Long tenantId, String EShosts) throws Exception {
 
         ElasticRestClient sclient = new ElasticRestClient();
         sclient.setHosts(Arrays.asList(EShosts));
@@ -52,23 +52,7 @@ public class LoadData {
         ElasticRestClient sclient = new ElasticRestClient();
         sclient.setHosts(Arrays.asList(EShosts));
         client = sclient.createInstance();
-//        Path path = Paths.get(file);
-//        byte[] result =  Files.readAllBytes(path);
-//
-//        logger.info("Read total length is " + result.length);
-//        doBulkRequestBytes(result);
-//        BufferedReader br = null;
-//        FileReader fr = null;
-
-
-
         try {
-//            fr = new FileReader(file);
-//            br = new BufferedReader(fr);
-//
-//
-//            br = new BufferedReader(new FileReader(file));
-
             StringBuilder builder = new StringBuilder(20240);
             FileInputStream fstream = new FileInputStream(file);
             BufferedReader bstream = new BufferedReader(new InputStreamReader(fstream));
@@ -446,7 +430,7 @@ public class LoadData {
             HttpEntity entity = new StringEntity(body);
             Response response = client.performRequest(
                     "GET",
-                    "/_search",
+                    "/stores*/_search",
                     params,
                     entity);
 
